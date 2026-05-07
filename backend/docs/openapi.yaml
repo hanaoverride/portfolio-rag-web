@@ -1,0 +1,1156 @@
+openapi: 3.0.3
+info:
+  title: Portfolio API
+  description: |
+    API specification for the Layer portfolio backend.
+
+    ## Chat / LLM Configuration
+    The chat completion endpoint uses OpenRouter as the default LLM provider. The following environment variables configure the LLM service:
+
+    | Variable | Description | Default |
+    |---|---|---|
+    | `OPENROUTER_API_KEY` | OpenRouter API key (takes priority over OpenAI) | — |
+    | `OPENROUTER_BASE_URL` | OpenRouter API base URL | `https://openrouter.ai/api/v1` |
+    | `OPENROUTER_MODEL` | Model identifier for chat completions | `gpt-oss-120b` |
+    | `OPENAI_API_KEY` | OpenAI API key (fallback when OpenRouter key is absent) | — |
+    | `DEMO_MODE` | When `true`, returns stub responses without any API key | `false` |
+
+    Key resolution priority: OpenRouter API key → OpenAI API key → Demo mode stub.
+  version: 1.0.0
+servers:
+- url: /api/v1
+  description: API v1
+security:
+- bearerAuth: []
+paths:
+  /health:
+    get:
+      tags:
+      - health
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /contents:
+    get:
+      tags:
+      - contents
+      summary: List contents
+      operationId: listContents
+      parameters:
+      - name: category
+        in: query
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: ^[\w\s가-힣/-]+$
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+          minLength: 2
+          maxLength: 100
+      - name: isNew
+        in: query
+        required: false
+        schema:
+          type: boolean
+        alias: isNew
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          maximum: 1000
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedContentsResponse'
+  /contents/{contentId}:
+    get:
+      tags:
+      - contents
+      summary: Get content detail
+      operationId: getContentDetail
+      parameters:
+      - name: contentId
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[A-Za-z0-9_-]+$
+          minLength: 1
+          maxLength: 40
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Content'
+        '404':
+          description: Content not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Content not found
+  /contents/{contentId}/related:
+    get:
+      tags:
+      - contents
+      summary: Get related contents
+      operationId: getRelatedContents
+      parameters:
+      - name: contentId
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[A-Za-z0-9_-]+$
+          minLength: 1
+          maxLength: 40
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 5
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedContentsResponse'
+        '404':
+          description: Content not found
+  /categories:
+    get:
+      tags:
+      - categories
+      summary: List categories
+      operationId: listCategories
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+  /categories/{slug}:
+    get:
+      tags:
+      - categories
+      summary: Get category detail
+      operationId: getCategoryDetail
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-z0-9-]+$
+          minLength: 1
+          maxLength: 120
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '404':
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Category not found
+  /categories/{slug}/contents:
+    get:
+      tags:
+      - categories
+      summary: Get category contents
+      operationId: getCategoryContents
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-z0-9-]+$
+          minLength: 1
+          maxLength: 120
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          maximum: 1000
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedContentsResponse'
+        '404':
+          description: Category not found
+  /youtubers:
+    get:
+      tags:
+      - youtubers
+      summary: List youtubers
+      operationId: listYouTubers
+      parameters:
+      - name: category
+        in: query
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: ^[\w\s가-힣/-]+$
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          maximum: 1000
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedYouTubersResponse'
+  /youtubers/{youtuberId}:
+    get:
+      tags:
+      - youtubers
+      summary: Get youtuber detail
+      operationId: getYouTuberDetail
+      parameters:
+      - name: youtuberId
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[A-Za-z0-9_-]+$
+          minLength: 1
+          maxLength: 60
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/YouTuber'
+        '404':
+          description: YouTuber not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: YouTuber not found
+  /auth/register:
+    post:
+      tags:
+      - auth
+      summary: Register new user
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+  /auth/login/email:
+    post:
+      tags:
+      - auth
+      summary: Login with email
+      operationId: loginWithEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailLoginRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+  /auth/login/google:
+    post:
+      tags:
+      - auth
+      summary: Login with Google
+      operationId: loginWithGoogle
+      parameters:
+      - name: token
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 20
+          maxLength: 8192
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+  /auth/password/reset:
+    post:
+      tags:
+      - auth
+      summary: Request password reset
+      operationId: requestPasswordReset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordResetInitResponse'
+  /auth/password/confirm:
+    post:
+      tags:
+      - auth
+      summary: Confirm password reset
+      operationId: confirmPasswordReset
+      parameters:
+      - name: token
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 20
+          maxLength: 512
+      - name: new_password
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+  /auth/logout:
+    post:
+      tags:
+      - auth
+      summary: Logout user
+      operationId: logoutUser
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No Content
+  /bookmarks:
+    get:
+      tags:
+      - bookmarks
+      summary: List user bookmarks
+      operationId: listBookmarks
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBookmarksResponse'
+    post:
+      tags:
+      - bookmarks
+      summary: Create bookmark
+      operationId: createBookmark
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookmarkRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkedContent'
+        '404':
+          description: Content not found
+  /bookmarks/{contentId}:
+    delete:
+      tags:
+      - bookmarks
+      summary: Delete bookmark
+      operationId: deleteBookmark
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: contentId
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[A-Za-z0-9_-]+$
+          minLength: 1
+          maxLength: 40
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Bookmark not found
+  /contents/{contentId}/comments:
+    get:
+      tags:
+      - comments
+      summary: List content comments
+      operationId: listComments
+      parameters:
+      - name: contentId
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[A-Za-z0-9_-]+$
+          minLength: 1
+          maxLength: 40
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCommentsResponse'
+        '404':
+          description: Content not found
+    post:
+      tags:
+      - comments
+      summary: Create comment
+      operationId: createComment
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: contentId
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[A-Za-z0-9_-]+$
+          minLength: 1
+          maxLength: 40
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentResponse'
+        '404':
+          description: Content not found
+  /contents/{contentId}/comments/{commentId}:
+    delete:
+      tags:
+      - comments
+      summary: Delete comment
+      operationId: deleteComment
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: contentId
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[A-Za-z0-9_-]+$
+          minLength: 1
+          maxLength: 40
+      - name: commentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Comment not found
+  /chat/completions:
+    post:
+      tags:
+      - chat
+      summary: Create chat completion
+      operationId: createChatCompletion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatCompletionRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatCompletionResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /export:
+    get:
+      tags:
+      - export
+      summary: Export dataset
+      operationId: exportDataset
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    Author:
+      type: object
+      required:
+      - name
+      - avatar
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        avatar:
+          type: string
+          format: uri
+    TableOfContentsItem:
+      type: object
+      required:
+      - id
+      - title
+      - level
+      properties:
+        id:
+          type: string
+          pattern: ^[A-Za-z0-9_-]+$
+          minLength: 1
+          maxLength: 60
+        title:
+          type: string
+          minLength: 1
+          maxLength: 150
+        emoji:
+          type: string
+          maxLength: 4
+        level:
+          type: integer
+          minimum: 1
+          maximum: 3
+        timestamp:
+          type: integer
+          minimum: 0
+          maximum: 36000
+    Content:
+      type: object
+      required:
+      - id
+      - title
+      - description
+      - thumbnail
+      - videoUrl
+      - category
+      - author
+      - duration
+      - views
+      - createdAt
+      - bodyContent
+      properties:
+        id:
+          type: string
+          pattern: ^[A-Za-z0-9_-]+$
+          minLength: 1
+          maxLength: 40
+        title:
+          type: string
+          minLength: 1
+          maxLength: 180
+        description:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        thumbnail:
+          type: string
+          format: uri
+        videoUrl:
+          type: string
+          format: uri
+        category:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 50
+        author:
+          $ref: '#/components/schemas/Author'
+        duration:
+          type: integer
+          minimum: 0
+          maximum: 21600
+        views:
+          type: integer
+          minimum: 0
+          maximum: 100000000
+        createdAt:
+          type: string
+          format: date-time
+        tableOfContents:
+          type: array
+          items:
+            $ref: '#/components/schemas/TableOfContentsItem'
+        bodyContent:
+          type: string
+          minLength: 1
+        relatedContents:
+          type: array
+          items:
+            type: string
+            pattern: ^[A-Za-z0-9_-]+$
+            minLength: 1
+            maxLength: 40
+        isNew:
+          type: boolean
+    Category:
+      type: object
+      required:
+      - id
+      - name
+      - slug
+      properties:
+        id:
+          type: string
+          pattern: ^[A-Za-z0-9_-]+$
+          minLength: 1
+          maxLength: 60
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        slug:
+          type: string
+          pattern: ^[a-z0-9-]+$
+          minLength: 1
+          maxLength: 120
+    YouTuber:
+      type: object
+      required:
+      - id
+      - name
+      - avatar
+      - channelUrl
+      - subscribers
+      - description
+      - categories
+      - contentCount
+      properties:
+        id:
+          type: string
+          pattern: ^[A-Za-z0-9_-]+$
+          minLength: 1
+          maxLength: 60
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        avatar:
+          type: string
+          format: uri
+        channelUrl:
+          type: string
+          format: uri
+        subscribers:
+          type: integer
+          minimum: 0
+          maximum: 100000000
+        description:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        categories:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 50
+        contentCount:
+          type: integer
+          minimum: 0
+          maximum: 10000
+    HealthResponse:
+      type: object
+      required:
+      - status
+      - service
+      properties:
+        status:
+          type: string
+          pattern: ^[a-z-]+$
+        service:
+          type: string
+    PaginatedContentsResponse:
+      type: object
+      required:
+      - items
+      - total
+      - limit
+      - offset
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Content'
+        total:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+        offset:
+          type: integer
+          minimum: 0
+    PaginatedYouTubersResponse:
+      type: object
+      required:
+      - items
+      - total
+      - limit
+      - offset
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/YouTuber'
+        total:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+        offset:
+          type: integer
+          minimum: 0
+    UserProfile:
+      type: object
+      required:
+      - id
+      - email
+      - displayName
+      - createdAt
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        email:
+          type: string
+          format: email
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 50
+        avatarUrl:
+          type: string
+          format: uri
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+    AuthTokens:
+      type: object
+      required:
+      - accessToken
+      - tokenType
+      properties:
+        accessToken:
+          type: string
+          minLength: 20
+        refreshToken:
+          type: string
+          minLength: 20
+          nullable: true
+        tokenType:
+          type: string
+          default: bearer
+          pattern: ^[a-z]+$
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        user:
+          $ref: '#/components/schemas/UserProfile'
+    RegisterRequest:
+      type: object
+      required:
+      - email
+      - password
+      - username
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+        username:
+          type: string
+          minLength: 1
+          maxLength: 50
+    EmailLoginRequest:
+      type: object
+      required:
+      - email
+      - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+    PasswordResetRequest:
+      type: object
+      required:
+      - email
+      properties:
+        email:
+          type: string
+          format: email
+    PasswordResetInitResponse:
+      type: object
+      required:
+      - message
+      properties:
+        message:
+          type: string
+        debugToken:
+          type: string
+    BookmarkRequest:
+      type: object
+      required:
+      - contentId
+      properties:
+        contentId:
+          type: string
+          pattern: ^[A-Za-z0-9_-]+$
+          minLength: 1
+          maxLength: 40
+    BookmarkedContent:
+      type: object
+      required:
+      - content
+      - bookmarkedAt
+      properties:
+        content:
+          $ref: '#/components/schemas/Content'
+        bookmarkedAt:
+          type: string
+          format: date-time
+    PaginatedBookmarksResponse:
+      type: object
+      required:
+      - items
+      - total
+      - limit
+      - offset
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookmarkedContent'
+        total:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+        offset:
+          type: integer
+          minimum: 0
+    CommentRequest:
+      type: object
+      required:
+      - text
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 500
+    CommentResponse:
+      type: object
+      required:
+      - id
+      - contentId
+      - userId
+      - text
+      - authorName
+      - createdAt
+      - updatedAt
+      properties:
+        id:
+          type: integer
+        contentId:
+          type: string
+        userId:
+          type: integer
+        text:
+          type: string
+        authorName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    PaginatedCommentsResponse:
+      type: object
+      required:
+      - items
+      - total
+      - limit
+      - offset
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommentResponse'
+        total:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+        offset:
+          type: integer
+          minimum: 0
+    ChatMessagePayload:
+      type: object
+      required:
+      - role
+      - content
+      properties:
+        role:
+          type: string
+          enum:
+          - system
+          - user
+          - assistant
+          default: user
+        content:
+          type: string
+    ChatCompletionRequest:
+      type: object
+      required:
+      - messages
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatMessagePayload'
+          minItems: 1
+          maxItems: 24
+        temperature:
+          type: number
+          minimum: 0
+          maximum: 1
+          nullable: true
+        stream:
+          type: boolean
+          default: false
+    ChatMessage:
+      type: object
+      required:
+      - role
+      - content
+      properties:
+        role:
+          type: string
+          enum:
+          - assistant
+        content:
+          type: string
+    ChatChoice:
+      type: object
+      required:
+      - index
+      - message
+      properties:
+        index:
+          type: integer
+        message:
+          $ref: '#/components/schemas/ChatMessage'
+        finishReason:
+          type: string
+          nullable: true
+    ChatCompletionResponse:
+      type: object
+      required:
+      - choices
+      properties:
+        choices:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatChoice'
+    ExportResponse:
+      type: object
+      required:
+      - categories
+      - contents
+      - youtubers
+      properties:
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+        contents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Content'
+        youtubers:
+          type: array
+          items:
+            $ref: '#/components/schemas/YouTuber'
