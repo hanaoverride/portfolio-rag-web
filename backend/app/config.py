@@ -45,6 +45,7 @@ class Settings(BaseSettings):
     google_client_ids: Any = Field(default_factory=list)
 
     openai_api_key: Optional[SecretStr] = Field(default=None)
+    openai_api_base: Optional[str] = Field(default=None, validation_alias=AliasChoices("OPENAI_API_BASE", "OPENAI_BASE_URL"))
     openrouter_api_key: Optional[SecretStr] = Field(default=None)
     openrouter_base_url: str = Field(default="https://openrouter.ai/api/v1")
     openrouter_model: str = Field(default="gpt-oss-120b")

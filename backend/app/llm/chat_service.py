@@ -35,7 +35,8 @@ class RealChatService(ChatServiceProtocol):
                     key = ai_key
 
         self._api_key = key
-        self._client = AsyncOpenAI(api_key=self._api_key, base_url=_settings.openrouter_base_url) if self._api_key else None
+        base_url = getattr(_settings, "openai_api_base", None) or _settings.openrouter_base_url
+        self._client = AsyncOpenAI(api_key=self._api_key, base_url=base_url) if self._api_key else None
         self._model = getattr(_settings, "openrouter_model", "gpt-oss-120b")
 
     def _require_api_key(self) -> None:
