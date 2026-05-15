@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, AsyncGenerator
 
 
 @dataclass
@@ -19,22 +19,28 @@ class RAGContext:
 
 class ChatServiceProtocol(ABC):
     @abstractmethod
-    async def chat(self, messages: list[ChatMessage]) -> str:
-        ...
+    async def chat(self, messages: list[ChatMessage]) -> str: ...
 
     @abstractmethod
-    async def chat_with_rag(self, messages: list[ChatMessage], context: RAGContext) -> str:
-        ...
+    async def chat_with_rag(
+        self, messages: list[ChatMessage], context: RAGContext
+    ) -> str: ...
+
+    @abstractmethod
+    def stream(self, messages: list[ChatMessage]) -> AsyncGenerator[str, None]: ...
+
+    @abstractmethod
+    def stream_with_rag(
+        self, messages: list[ChatMessage], context: RAGContext
+    ) -> AsyncGenerator[str, None]: ...
 
 
 class EmbeddingServiceProtocol(ABC):
     @abstractmethod
-    async def get_embedding(self, text: str) -> list[float]:
-        ...
+    async def get_embedding(self, text: str) -> list[float]: ...
 
     @abstractmethod
-    async def get_embeddings(self, texts: list[str]) -> list[list[float]]:
-        ...
+    async def get_embeddings(self, texts: list[str]) -> list[list[float]]: ...
 
 
 @dataclass
@@ -46,9 +52,14 @@ class SearchResult:
 
 class VectorStoreProtocol(ABC):
     @abstractmethod
-    async def upsert(self, texts: list[str], embeddings: list[list[float]], metadatas: list[dict[str, Any]] | None = None) -> None:
-        ...
+    async def upsert(
+        self,
+        texts: list[str],
+        embeddings: list[list[float]],
+        metadatas: list[dict[str, Any]] | None = None,
+    ) -> None: ...
 
     @abstractmethod
-    async def search(self, query_embedding: list[float], limit: int = 5) -> list[SearchResult]:
-        ...
+    async def search(
+        self, query_embedding: list[float], limit: int = 5
+    ) -> list[SearchResult]: ...
