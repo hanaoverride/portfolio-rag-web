@@ -64,6 +64,7 @@ class ChatCompletionRequest(CamelModel):
     messages: List[ChatMessagePayload] = Field(default_factory=list)
     temperature: Optional[float] = None
     stream: Optional[bool] = False
+    use_rag: bool = Field(default=False)
 
 
 class Author(CamelModel):
