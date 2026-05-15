@@ -156,15 +156,22 @@ alembic upgrade head
 alembic downgrade -1
 ```
 
-#### Seed Data
+#### Seed Data and RAG Ingestion
 
-Populate the database with sample data:
+Layer automatically handles database migrations, seeding, and RAG ingestion on startup via the `scripts/start.sh` script.
+
+To manually trigger a refresh of the RAG vector store:
+
+```bash
+# Using the Admin API
+curl -X POST http://localhost:8080/api/v1/admin/ingest
+```
+
+Or run the script manually:
 
 ```bash
 cd backend
-
-# Run seed script
-python -m app.data.seed
+python -m app.data.ingest
 ```
 
 ---
@@ -376,15 +383,22 @@ alembic upgrade head
 alembic downgrade -1
 ```
 
-#### 샘플 데이터
+#### 샘플 데이터 및 RAG 인제스션
 
-데이터베이스에 샘플 데이터 채우기:
+Layer는 `scripts/start.sh` 스크립트를 통해 시작 시 데이터베이스 마이그레이션, 시딩 및 RAG 인제스션을 자동으로 처리합니다.
+
+RAG 벡터 저장소를 수동으로 갱신하려면:
+
+```bash
+# Admin API 사용
+curl -X POST http://localhost:8080/api/v1/admin/ingest
+```
+
+또는 스크립트를 직접 실행하십시오:
 
 ```bash
 cd backend
-
-# 시드 스크립트 실행
-python -m app.data.seed
+python -m app.data.ingest
 ```
 
 ---
