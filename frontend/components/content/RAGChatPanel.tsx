@@ -24,12 +24,14 @@ const RAGChatPanel: React.FC<RAGChatPanelProps> = ({ contentId = '', contentTitl
 
   const hasError = error !== null && error !== undefined;
 
+  const [useRag, setUseRag] = useState(true);
+
   // Adapted send: pass structured content so backend can receive context
   const onSend = async () => {
     if (!input.trim()) return;
     // Wrap the user message as structured content to include context
     const structured = { type: 'text', content: input.trim(), source: contentTitle || contentId || '' } as any;
-    await sendMessage(structured);
+    await sendMessage(structured, { useRag });
     setInput('');
   };
 
@@ -75,6 +77,10 @@ const RAGChatPanel: React.FC<RAGChatPanelProps> = ({ contentId = '', contentTitl
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <strong>RAG Chat Panel</strong>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: 'pointer' }}>
+                <input type="checkbox" checked={useRag} onChange={(e) => setUseRag(e.target.checked)} />
+                RAG
+              </label>
             </div>
             <button onClick={togglePanel} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }} aria-label="Close">✕</button>
           </div>
