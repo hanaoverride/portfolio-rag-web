@@ -5,9 +5,13 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import settings
 from app.data.repository import get_content_by_id, get_contents
-from app.data.schemas import Author, ContentListResponse, ContentResponse, TableOfContentsItem
+from app.data.schemas import (
+    Author,
+    ContentListResponse,
+    ContentResponse,
+    TableOfContentsItem,
+)
 from app.data.database import get_db
 
 router = APIRouter(prefix="/contents", tags=["contents"])
@@ -40,7 +44,9 @@ async def list_contents(
     category: Optional[str] = Query(None, description="Filter by category name"),
     search: Optional[str] = Query(None, description="Search in title/description"),
     is_new: Optional[bool] = Query(None, description="Filter by is_new flag"),
-    sort_by: Optional[str] = Query(None, description="Sort by field (views, created_at)"),
+    sort_by: Optional[str] = Query(
+        None, description="Sort by field (views, created_at)"
+    ),
     order: str = Query("desc", description="Sort order (asc, desc)"),
     offset: int = Query(0, ge=0, description="Pagination offset"),
     limit: int = Query(20, ge=1, le=100, description="Pagination limit"),
@@ -50,11 +56,17 @@ async def list_contents(
     try:
         contents = await get_contents(session)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch contents: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to fetch contents: {str(e)}"
+        )
 
     # Apply filters
     if category:
-        contents = [c for c in contents if category.lower() in [cat.lower() for cat in c.category]]
+        contents = [
+            c
+            for c in contents
+            if category.lower() in [cat.lower() for cat in c.category]
+        ]
     if is_new is not None:
         contents = [c for c in contents if c.is_new is is_new]
     if search:
@@ -109,7 +121,9 @@ async def get_related_contents(
     try:
         all_contents = await get_contents(session)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch contents: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to fetch contents: {str(e)}"
+        )
 
     related = [c for c in all_contents if c.id in related_ids]
     total = len(related)

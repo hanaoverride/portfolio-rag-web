@@ -39,7 +39,12 @@ def upgrade() -> None:
         sa.Column("author_avatar", sa.String(length=500), nullable=False),
         sa.Column("duration", sa.Integer(), nullable=False),
         sa.Column("views", sa.Integer(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
         sa.Column("table_of_contents", sa.JSON(), nullable=False),
         sa.Column("body_content", sa.Text(), nullable=False),
         sa.Column("related_contents", sa.JSON(), nullable=False),
@@ -54,9 +59,21 @@ def upgrade() -> None:
         sa.Column("display_name", sa.String(length=120), nullable=False),
         sa.Column("password_hash", sa.String(length=255), nullable=True),
         sa.Column("google_sub", sa.String(length=128), nullable=True),
-        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("TRUE")),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "is_active", sa.Boolean(), nullable=False, server_default=sa.text("TRUE")
+        ),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
         sa.Column("last_login_at", sa.DateTime(timezone=True), nullable=True),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("email", name="uq_users_email"),
@@ -83,7 +100,12 @@ def upgrade() -> None:
         sa.Column("token_hash", sa.String(length=128), nullable=False),
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("used_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("token_hash"),
@@ -94,23 +116,40 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("token_hash", sa.String(length=128), nullable=False),
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index("ix_revoked_tokens_token_hash", "revoked_tokens", ["token_hash"], unique=True)
+    op.create_index(
+        "ix_revoked_tokens_token_hash", "revoked_tokens", ["token_hash"], unique=True
+    )
 
     op.create_table(
         "bookmarks",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=False),
         sa.Column("content_id", sa.String(length=48), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
         sa.ForeignKeyConstraint(["content_id"], ["contents.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("user_id", "content_id", name="uq_bookmarks_user_content"),
     )
-    op.create_index("ix_bookmarks_user_created", "bookmarks", ["user_id", "created_at"], unique=False)
+    op.create_index(
+        "ix_bookmarks_user_created",
+        "bookmarks",
+        ["user_id", "created_at"],
+        unique=False,
+    )
 
 
 def downgrade() -> None:

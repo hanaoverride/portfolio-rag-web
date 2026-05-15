@@ -10,7 +10,6 @@ from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..config import settings
 from ..data.database import get_db
 from ..data.models import RevokedToken, User
 
@@ -72,11 +71,16 @@ async def get_current_admin(
 ) -> User:
     """Get the current authenticated user and check if they are an admin."""
     import logging
+
     logger = logging.getLogger(__name__)
-    logger.info(f"Checking admin status for user: {user.email}, is_admin: {user.is_admin}, role: {user.role}")
-    
+    logger.info(
+        f"Checking admin status for user: {user.email}, is_admin: {user.is_admin}, role: {user.role}"
+    )
+
     if not user.is_admin and user.role != "admin" and user.role != "ADMIN":
-        logger.warning(f"Access denied for user {user.email}: Not an admin (is_admin={user.is_admin}, role={user.role})")
+        logger.warning(
+            f"Access denied for user {user.email}: Not an admin (is_admin={user.is_admin}, role={user.role})"
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="The user does not have enough privileges",

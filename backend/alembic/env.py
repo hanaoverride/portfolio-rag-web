@@ -5,7 +5,7 @@ import sys
 import logging
 
 # Add the parent directory to sys.path so we can import the 'app' package
-sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 from logging.config import fileConfig
 
 from alembic import context

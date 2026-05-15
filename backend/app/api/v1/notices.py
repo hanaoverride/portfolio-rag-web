@@ -6,7 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...data.database import get_db
 from ...data.models import Notice, User
-from ...data.schemas import CreateNoticeRequest, NoticeResponse, PaginatedNoticesResponse
+from ...data.schemas import (
+    CreateNoticeRequest,
+    NoticeResponse,
+    PaginatedNoticesResponse,
+)
 from ..dependencies import get_current_admin
 
 router = APIRouter()
@@ -19,16 +23,18 @@ async def list_notices(
     db: AsyncSession = Depends(get_db),
 ):
     """List notices with pagination."""
-    query = select(Notice).order_by(Notice.is_important.desc(), Notice.created_at.desc())
-    
+    query = select(Notice).order_by(
+        Notice.is_important.desc(), Notice.created_at.desc()
+    )
+
     # Get total count
     count_query = select(func.count()).select_from(Notice)
     total = await db.scalar(count_query) or 0
-    
+
     # Get items
     result = await db.execute(query.offset(offset).limit(limit))
     items = result.scalars().all()
-    
+
     # Convert to response objects
     notice_list = []
     for item in items:
@@ -36,7 +42,7 @@ async def list_notices(
         author_result = await db.execute(select(User).where(User.id == item.author_id))
         author = author_result.scalar_one_or_none()
         author_name = author.display_name if author else "Unknown"
-        
+
         notice_list.append(
             NoticeResponse(
                 id=item.id,
@@ -48,7 +54,7 @@ async def list_notices(
                 author_name=author_name,
             )
         )
-    
+
     return PaginatedNoticesResponse(
         items=notice_list,
         total=total,
@@ -70,11 +76,11 @@ async def create_notice(
         is_important=request.is_important,
         author_id=admin.id,
     )
-    
+
     db.add(new_notice)
     await db.commit()
     await db.refresh(new_notice)
-    
+
     return NoticeResponse(
         id=new_notice.id,
         title=new_notice.title,
@@ -94,17 +100,17 @@ async def get_notice(
     """Get a specific notice."""
     result = await db.execute(select(Notice).where(Notice.id == notice_id))
     notice = result.scalar_one_or_none()
-    
+
     if not notice:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Notice not found",
         )
-        
+
     author_result = await db.execute(select(User).where(User.id == notice.author_id))
     author = author_result.scalar_one_or_none()
     author_name = author.display_name if author else "Unknown"
-    
+
     return NoticeResponse(
         id=notice.id,
         title=notice.title,

@@ -5,7 +5,7 @@ import logging
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .database import get_async_engine, Base
+from .database import get_async_engine
 from .seed_data import CATEGORIES, YOUTUBERS, CONTENTS
 from ..auth.service import get_password_hash
 from .models import User, UserRole
@@ -17,16 +17,19 @@ logger = logging.getLogger(__name__)
 async def seed_categories(session: AsyncSession) -> None:
     """Seed categories if they don't exist."""
     from sqlalchemy import text
-    
+
     # Removed check to allow upsert
-    
+
     for category in CATEGORIES:
-        await session.execute(text("""
+        await session.execute(
+            text("""
             INSERT INTO categories (id, name, slug)
             VALUES (:id, :name, :slug)
             ON CONFLICT (id) DO NOTHING
-        """), category)
-    
+        """),
+            category,
+        )
+
     await session.commit()
     logger.info(f"Seeded {len(CATEGORIES)} categories")
 
@@ -35,13 +38,14 @@ async def seed_youtubers(session: AsyncSession) -> None:
     """Seed YouTubers if they don't exist."""
     from sqlalchemy import text
     import json
-    
+
     # Removed check to allow upsert
-    
+
     for youtuber in YOUTUBERS:
         data = youtuber.copy()
-        data['categories'] = json.dumps(data['categories'])
-        await session.execute(text("""
+        data["categories"] = json.dumps(data["categories"])
+        await session.execute(
+            text("""
             INSERT INTO youtubers (id, name, avatar, channel_url, subscribers, description, categories, content_count)
             VALUES (:id, :name, :avatar, :channel_url, :subscribers, :description, :categories, :content_count)
             ON CONFLICT (id) DO UPDATE SET
@@ -52,8 +56,10 @@ async def seed_youtubers(session: AsyncSession) -> None:
                 description = EXCLUDED.description,
                 categories = EXCLUDED.categories,
                 content_count = EXCLUDED.content_count
-        """), data)
-    
+        """),
+            data,
+        )
+
     await session.commit()
     logger.info(f"Seeded {len(YOUTUBERS)} YouTubers")
 
@@ -63,17 +69,18 @@ async def seed_contents(session: AsyncSession) -> None:
     from sqlalchemy import text
     from datetime import datetime
     import json
-    
+
     # Removed check to allow upsert
-    
+
     for content in CONTENTS:
         data = content.copy()
-        data['category'] = json.dumps(data['category'])
-        data['table_of_contents'] = json.dumps(data['table_of_contents'])
-        data['related_contents'] = json.dumps(data['related_contents'])
-        data['created_at'] = datetime.fromisoformat(data['created_at'])
-        
-        await session.execute(text("""
+        data["category"] = json.dumps(data["category"])
+        data["table_of_contents"] = json.dumps(data["table_of_contents"])
+        data["related_contents"] = json.dumps(data["related_contents"])
+        data["created_at"] = datetime.fromisoformat(data["created_at"])
+
+        await session.execute(
+            text("""
             INSERT INTO contents (
                 id, title, description, thumbnail, video_url, category,
                 author_name, author_avatar, duration, views, created_at,
@@ -98,8 +105,10 @@ async def seed_contents(session: AsyncSession) -> None:
                 table_of_contents = EXCLUDED.table_of_contents,
                 body_content = EXCLUDED.body_content,
                 related_contents = EXCLUDED.related_contents
-        """), data)
-    
+        """),
+            data,
+        )
+
     await session.commit()
     logger.info(f"Seeded {len(CONTENTS)} contents")
 
@@ -109,15 +118,15 @@ async def seed_admin(session: AsyncSession) -> None:
     admin_email = "admin@example.com"
     result = await session.execute(select(User).where(User.email == admin_email))
     admin = result.scalar_one_or_none()
-    
+
     if not admin:
         admin = User(
             email=admin_email,
             display_name="Administrator",
-            password_hash=get_password_hash("admin1234"), # Default password
+            password_hash=get_password_hash("admin1234"),  # Default password
             is_active=True,
             is_admin=True,
-            role=UserRole.ADMIN
+            role=UserRole.ADMIN,
         )
         session.add(admin)
         await session.commit()
@@ -127,13 +136,13 @@ async def seed_admin(session: AsyncSession) -> None:
         admin.role = UserRole.ADMIN
         admin.is_admin = True
         await session.commit()
-        logger.info(f"Admin user already exists, updated role.")
+        logger.info("Admin user already exists, updated role.")
 
 
 async def seed_all() -> None:
     """Run all seed operations."""
     engine = get_async_engine()
-    
+
     async with AsyncSession(engine) as session:
         try:
             await seed_categories(session)

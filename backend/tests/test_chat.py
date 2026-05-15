@@ -1,8 +1,3 @@
-import sys
-import types
-import pytest
-
-
 class DummySecret:
     def __init__(self, value: str):
         self._value = value
@@ -14,6 +9,7 @@ class DummySecret:
 def _patch_settings(monkeypatch, settings_obj):
     # Patch app.config.settings used by the factory
     import app.config as config_module
+
     monkeypatch.setattr(config_module, "settings", settings_obj, raising=False)
 
 
@@ -37,6 +33,7 @@ def test_stub_chat_service_when_demo_mode_true(monkeypatch):
 def test_real_chat_service_created_when_not_in_demo_and_openrouter_key(monkeypatch):
     from app.llm.chat_service import RealChatService
     from app.llm.stub_chat_service import get_chat_service
+
     # Patch AsyncOpenAI to avoid real API calls
     class DummyClient:
         def __init__(self, api_key=None, base_url=None):
@@ -44,6 +41,7 @@ def test_real_chat_service_created_when_not_in_demo_and_openrouter_key(monkeypat
             self.base_url = base_url
 
     import app.llm.chat_service as chat_service_module
+
     monkeypatch.setattr(chat_service_module, "AsyncOpenAI", DummyClient)
 
     # Provide settings with OpenRouter API key and demo_mode = False
@@ -67,12 +65,14 @@ def test_real_chat_service_created_when_not_in_demo_and_openrouter_key(monkeypat
 def test_openai_key_fallback_when_openrouter_key_missing(monkeypatch):
     from app.llm.chat_service import RealChatService
     from app.llm.stub_chat_service import get_chat_service
+
     class DummyClient:
         def __init__(self, api_key=None, base_url=None):
             self.api_key = api_key
             self.base_url = base_url
 
     import app.llm.chat_service as chat_service_module
+
     monkeypatch.setattr(chat_service_module, "AsyncOpenAI", DummyClient)
 
     class SettingsLike:
@@ -92,6 +92,7 @@ def test_openai_key_fallback_when_openrouter_key_missing(monkeypatch):
 
 def test_chat_completion_request_schema_with_messages():
     from app.data.schemas import ChatCompletionRequest, ChatMessagePayload
+
     req = ChatCompletionRequest(
         messages=[
             ChatMessagePayload(role="user", content="Hello"),
@@ -105,6 +106,7 @@ def test_chat_completion_request_schema_with_messages():
 
 def test_chat_completion_request_schema_default_values():
     from app.data.schemas import ChatCompletionRequest
+
     req = ChatCompletionRequest()
     assert req.messages == []
     assert req.stream is False
@@ -113,6 +115,7 @@ def test_chat_completion_request_schema_default_values():
 
 def test_chat_completion_request_schema_with_temperature():
     from app.data.schemas import ChatCompletionRequest, ChatMessagePayload
+
     req = ChatCompletionRequest(
         messages=[ChatMessagePayload(role="user", content="Hello")],
         temperature=0.7,
@@ -124,6 +127,7 @@ def test_chat_completion_request_schema_with_temperature():
 
 def test_chat_message_payload_default_values():
     from app.data.schemas import ChatMessagePayload
+
     msg = ChatMessagePayload()
     assert msg.role == "user"
     assert msg.content == ""

@@ -1,18 +1,28 @@
 """Comment API routes."""
+
 from __future__ import annotations
 
 import logging
 
-logger = logging.getLogger(__name__)
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.data.comments_repository import create_comment, delete_comment, get_content_comments, update_comment
+from app.api.dependencies import get_current_user
+from app.data.comments_repository import (
+    create_comment,
+    delete_comment,
+    get_content_comments,
+    update_comment,
+)
 from app.data.database import get_db
 from app.data.models import User
-from app.data.schemas import CommentResponse, PaginatedCommentsResponse, CreateCommentRequest
-from app.api.dependencies import get_current_user
+from app.data.schemas import (
+    CommentResponse,
+    CreateCommentRequest,
+    PaginatedCommentsResponse,
+)
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/contents", tags=["comments"])
 
@@ -40,10 +50,16 @@ async def list_comments(
         for c in comments
     ]
 
-    return PaginatedCommentsResponse(items=items, total=total, limit=limit, offset=offset)
+    return PaginatedCommentsResponse(
+        items=items, total=total, limit=limit, offset=offset
+    )
 
 
-@router.post("/{content_id}/comments", response_model=CommentResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{content_id}/comments",
+    response_model=CommentResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_comment_route(
     content_id: str,
     request: CreateCommentRequest,
@@ -113,11 +129,15 @@ async def delete_comment_route(
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, str]:
     """Delete a comment (protected, owner only)."""
-    logger.info(f"Delete request for comment {comment_id} on content {content_id} by user {current_user.id}")
+    logger.info(
+        f"Delete request for comment {comment_id} on content {content_id} by user {current_user.id}"
+    )
     try:
         deleted = await delete_comment(db, comment_id, current_user.id)
         if not deleted:
-            logger.warning(f"Comment {comment_id} not found or not authorized for user {current_user.id}")
+            logger.warning(
+                f"Comment {comment_id} not found or not authorized for user {current_user.id}"
+            )
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Comment not found or not authorized",
@@ -128,7 +148,9 @@ async def delete_comment_route(
         # Re-raise HTTP exceptions as-is, they are handled by FastAPI
         raise
     except Exception as e:
-        logger.error(f"Unexpected error deleting comment {comment_id}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Unexpected error deleting comment {comment_id}: {str(e)}", exc_info=True
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred while deleting the comment",

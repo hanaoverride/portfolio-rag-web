@@ -15,7 +15,6 @@ import {
   LogOut,
   UserCircle,
   ShieldCheck,
-  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Category, Content } from "@/lib/api/types";

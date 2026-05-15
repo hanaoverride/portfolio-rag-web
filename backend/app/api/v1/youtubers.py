@@ -34,7 +34,9 @@ async def list_youtubers(
     try:
         youtubers = await get_youtubers(session)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch youtubers: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to fetch youtubers: {str(e)}"
+        )
 
     total = len(youtubers)
     paginated = youtubers[offset : offset + limit]

@@ -22,7 +22,9 @@ async def test_login_email_rejects_inactive_user(async_client, async_session):
     mock_user.last_login_at = None
     mock_user.created_at = datetime.now(timezone.utc)
 
-    with patch("app.data.users_repository.get_user_by_email", new_callable=AsyncMock) as mock_get:
+    with patch(
+        "app.data.users_repository.get_user_by_email", new_callable=AsyncMock
+    ) as mock_get:
         mock_get.return_value = mock_user
 
         with patch("app.api.v1.auth.verify_password", return_value=True):
@@ -50,11 +52,17 @@ async def test_login_google_rejects_inactive_user(async_client, async_session):
     mock_user.last_login_at = None
     mock_user.created_at = datetime.now(timezone.utc)
 
-    with patch("app.data.users_repository.get_user_by_google_sub", new_callable=AsyncMock) as mock_get:
+    with patch(
+        "app.data.users_repository.get_user_by_google_sub", new_callable=AsyncMock
+    ) as mock_get:
         mock_get.return_value = mock_user
 
         with patch("google.oauth2.id_token.verify_oauth2_token") as mock_verify:
-            mock_verify.return_value = {"sub": "google_123", "email": "inactive@test.com", "name": "Inactive User"}
+            mock_verify.return_value = {
+                "sub": "google_123",
+                "email": "inactive@test.com",
+                "name": "Inactive User",
+            }
 
             with patch("app.api.v1.auth.settings") as mock_settings:
                 mock_settings.google_client_ids = ["test-client-id"]
@@ -82,7 +90,9 @@ async def test_login_email_accepts_active_user(async_client, async_session):
     mock_user.last_login_at = None
     mock_user.created_at = datetime.now(timezone.utc)
 
-    with patch("app.data.users_repository.get_user_by_email", new_callable=AsyncMock) as mock_get:
+    with patch(
+        "app.data.users_repository.get_user_by_email", new_callable=AsyncMock
+    ) as mock_get:
         mock_get.return_value = mock_user
 
         with patch("app.api.v1.auth.verify_password", return_value=True):
@@ -111,7 +121,9 @@ async def test_user_profile_has_display_name_field():
     )
 
     data = profile.model_dump(by_alias=True)
-    assert "displayName" in data, f"Expected displayName in response, got: {data.keys()}"
+    assert "displayName" in data, (
+        f"Expected displayName in response, got: {data.keys()}"
+    )
     assert data["displayName"] == "Test User"
     assert "username" not in data
 

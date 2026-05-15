@@ -18,7 +18,9 @@ depends_on: Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    op.add_column("users", sa.Column("avatar_url", sa.String(length=500), nullable=True))
+    op.add_column(
+        "users", sa.Column("avatar_url", sa.String(length=500), nullable=True)
+    )
 
 
 def downgrade() -> None:

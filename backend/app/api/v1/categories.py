@@ -1,12 +1,16 @@
 """Categories API routes."""
 
-from typing import Optional
-
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.data.repository import get_categories, get_contents
-from app.data.schemas import CategoryResponse, ContentListResponse, ContentResponse, Author, TableOfContentsItem
+from app.data.schemas import (
+    CategoryResponse,
+    ContentListResponse,
+    ContentResponse,
+    Author,
+    TableOfContentsItem,
+)
 from app.data.database import get_db
 
 router = APIRouter(prefix="/categories", tags=["categories"])
@@ -40,7 +44,9 @@ async def list_categories(session: AsyncSession = Depends(get_db)):
     try:
         categories = await get_categories(session)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch categories: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to fetch categories: {str(e)}"
+        )
     return [CategoryResponse(id=c.id, name=c.name, slug=c.slug) for c in categories]
 
 
@@ -74,9 +80,13 @@ async def get_category_contents(
     try:
         all_contents = await get_contents(session)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch contents: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to fetch contents: {str(e)}"
+        )
 
-    filtered = [c for c in all_contents if slug.lower() in [cat.lower() for cat in c.category]]
+    filtered = [
+        c for c in all_contents if slug.lower() in [cat.lower() for cat in c.category]
+    ]
     total = len(filtered)
     paginated = filtered[offset : offset + limit]
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from sqlalchemy import delete, select
+from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,6 +29,7 @@ async def get_content_comments(
     """Get comments for a content with pagination."""
     # Get total count
     from sqlalchemy import func
+
     count_result = await session.execute(
         select(func.count()).where(Comment.content_id == content_id)
     )
@@ -54,7 +55,9 @@ async def delete_comment(session: AsyncSession, comment_id: int, user_id: int) -
     )
     comment = result.scalar_one_or_none()
     if not comment:
-        logger.warning(f"Comment {comment_id} not found or not authorized for user {user_id}")
+        logger.warning(
+            f"Comment {comment_id} not found or not authorized for user {user_id}"
+        )
         return False
 
     await session.delete(comment)

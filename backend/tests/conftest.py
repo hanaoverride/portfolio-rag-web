@@ -16,7 +16,9 @@ test_settings.api_prefix = "/api/v1"
 test_settings.allowed_origins = ["http://localhost:3000"]
 test_settings.trusted_hosts = ["localhost", "127.0.0.1"]
 test_settings.jwt_secret_key = MagicMock()
-test_settings.jwt_secret_key.get_secret_value.return_value = "test-secret-key-for-testing-only12"
+test_settings.jwt_secret_key.get_secret_value.return_value = (
+    "test-secret-key-for-testing-only12"
+)
 test_settings.google_client_ids = []
 test_settings.openai_api_key = None
 test_settings.openrouter_api_key = None
@@ -33,7 +35,7 @@ mock_config.get_settings.return_value = test_settings
 mock_config.settings = test_settings
 mock_config.Settings = MagicMock()
 
-sys.modules['app.config'] = mock_config
+sys.modules["app.config"] = mock_config
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///file::memory:?cache=shared&uri=true"
 

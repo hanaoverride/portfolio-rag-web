@@ -12,7 +12,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/notifications", tags=["notifications"])
 
 
-@router.post("", response_model=NotificationResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "", response_model=NotificationResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_notification(
     request: CreateNotificationRequest,
     db: AsyncSession = Depends(get_db),
@@ -21,13 +23,15 @@ async def create_notification(
     """
     Create a new notification. Restricted to administrators.
     """
-    logger.info(f"Creating notification: {request.title} for user_id: {request.user_id}")
+    logger.info(
+        f"Creating notification: {request.title} for user_id: {request.user_id}"
+    )
     try:
         notification = Notification(
             title=request.title,
             message=request.message,
             user_id=request.user_id,
-            is_read=False
+            is_read=False,
         )
         db.add(notification)
         await db.commit()
@@ -39,7 +43,7 @@ async def create_notification(
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Notification creation failed: {str(e)}"
+            detail=f"Notification creation failed: {str(e)}",
         )
 
 
@@ -53,10 +57,14 @@ async def get_my_notifications(
     """
     logger.info(f"Fetching notifications for user: {current_user.email}")
     # Get user specific notifications + global notifications (user_id is None)
-    query = select(Notification).where(
-        (Notification.user_id == current_user.id) | (Notification.user_id.is_(None))
-    ).order_by(Notification.created_at.desc())
-    
+    query = (
+        select(Notification)
+        .where(
+            (Notification.user_id == current_user.id) | (Notification.user_id.is_(None))
+        )
+        .order_by(Notification.created_at.desc())
+    )
+
     result = await db.execute(query)
     notifications = result.scalars().all()
     logger.info(f"Found {len(notifications)} notifications")
@@ -72,29 +80,34 @@ async def delete_notification(
     """
     Delete a specific notification.
     """
-    logger.info(f"Delete request received for ID: {notification_id} from user: {current_user.email}")
-    
-    query = select(Notification).where(
-        Notification.id == notification_id
+    logger.info(
+        f"Delete request received for ID: {notification_id} from user: {current_user.email}"
     )
+
+    query = select(Notification).where(Notification.id == notification_id)
     result = await db.execute(query)
     notification = result.scalar_one_or_none()
-    
+
     if not notification:
         logger.warning(f"Notification {notification_id} not found")
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Notification not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Notification not found"
         )
-    
+
     # Check permissions
-    if notification.user_id is not None and notification.user_id != current_user.id and not current_user.is_admin:
-        logger.warning(f"Permission denied for user {current_user.email} to delete notification {notification_id}")
+    if (
+        notification.user_id is not None
+        and notification.user_id != current_user.id
+        and not current_user.is_admin
+    ):
+        logger.warning(
+            f"Permission denied for user {current_user.email} to delete notification {notification_id}"
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to delete this notification"
+            detail="You do not have permission to delete this notification",
         )
-    
+
     try:
         await db.delete(notification)
         await db.commit()
@@ -104,7 +117,7 @@ async def delete_notification(
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Deletion failed: {str(e)}"
+            detail=f"Deletion failed: {str(e)}",
         )
     return {"status": "success", "message": "Notification deleted"}
 
@@ -131,19 +144,21 @@ async def delete_all_notifications(
     """
     logger.info(f"Delete all request received from user: {current_user.email}")
     try:
-        query = delete(Notification).where(
-            Notification.user_id == current_user.id
-        )
+        query = delete(Notification).where(Notification.user_id == current_user.id)
         result = await db.execute(query)
         await db.commit()
-        logger.info(f"Deleted {result.rowcount} notifications for user {current_user.email}")
+        logger.info(
+            f"Deleted {result.rowcount} notifications for user {current_user.email}"
+        )
         return {"status": "success", "deleted_count": result.rowcount}
     except Exception as e:
-        logger.error(f"Failed to delete all notifications for user {current_user.email}: {e}")
+        logger.error(
+            f"Failed to delete all notifications for user {current_user.email}: {e}"
+        )
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Bulk deletion failed: {str(e)}"
+            detail=f"Bulk deletion failed: {str(e)}",
         )
 
 

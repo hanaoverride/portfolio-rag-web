@@ -10,10 +10,16 @@ from jose import JWTError
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.service import verify_password, get_password_hash, create_access_token, decode_token
+from app.auth.service import (
+    verify_password,
+    get_password_hash,
+    create_access_token,
+    decode_token,
+)
 from app.config import settings
 from app.data.database import get_db
-from app.data.models import RevokedToken, User
+from app.api.dependencies import get_current_user
+from app.data.models import PasswordResetToken, RevokedToken, User
 from app.data.schemas import (
     AuthTokens,
     LoginRequest,
@@ -22,7 +28,6 @@ from app.data.schemas import (
     RegisterRequest,
     UserProfile,
 )
-from app.api.dependencies import get_current_user
 from passlib.context import CryptContext
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -30,7 +35,9 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-@router.post("/register", response_model=AuthTokens, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register", response_model=AuthTokens, status_code=status.HTTP_201_CREATED
+)
 async def register(
     request: RegisterRequest,
     db: AsyncSession = Depends(get_db),
@@ -49,7 +56,10 @@ async def register(
     from app.data.users_repository import create_user
 
     user = await create_user(
-        db, email=request.email, password_hash=password_hash, display_name=request.display_name
+        db,
+        email=request.email,
+        password_hash=password_hash,
+        display_name=request.display_name,
     )
 
     access_token = create_access_token(data={"sub": str(user.id), "email": user.email})
@@ -201,7 +211,6 @@ async def request_password_reset(
     user = await get_user_by_email(db, request.email)
     if user:
         token_hash = get_password_hash(str(datetime.now(timezone.utc).timestamp()))
-        from app.data.models import PasswordResetToken
 
         reset_token = PasswordResetToken(
             user_id=user.id,

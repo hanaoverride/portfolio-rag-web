@@ -28,18 +28,30 @@ class CamelModel(BaseModel):
 
 
 class RegisterRequest(CamelModel):
-    email: constr(min_length=1, max_length=255, pattern=r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
+    email: constr(
+        min_length=1,
+        max_length=255,
+        pattern=r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$",
+    )
     password: constr(min_length=8, max_length=128)
     display_name: constr(min_length=1, max_length=50)
 
 
 class LoginRequest(CamelModel):
-    email: constr(min_length=1, max_length=255, pattern=r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
+    email: constr(
+        min_length=1,
+        max_length=255,
+        pattern=r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$",
+    )
     password: constr(min_length=1, max_length=128)
 
 
 class PasswordResetRequest(CamelModel):
-    email: constr(min_length=1, max_length=255, pattern=r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
+    email: constr(
+        min_length=1,
+        max_length=255,
+        pattern=r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$",
+    )
 
 
 class PasswordResetInitResponse(CamelModel):
@@ -93,7 +105,9 @@ class ContentResponse(CamelModel):
     created_at: datetime
     table_of_contents: List[TableOfContentsItem] = Field(default_factory=list)
     body_content: constr(min_length=1)
-    related_contents: List[constr(min_length=1, max_length=40, pattern=r"^[A-Za-z0-9_-]+$")] = Field(default_factory=list)
+    related_contents: List[
+        constr(min_length=1, max_length=40, pattern=r"^[A-Za-z0-9_-]+$")
+    ] = Field(default_factory=list)
     is_new: Optional[bool] = None
 
 
@@ -128,7 +142,7 @@ class AuthTokens(CamelModel):
     access_token: str
     refresh_token: Optional[str] = None
     token_type: str = "Bearer"
-    user: Optional['UserProfile'] = None
+    user: Optional["UserProfile"] = None
     expires_at: Optional[datetime] = None
 
 

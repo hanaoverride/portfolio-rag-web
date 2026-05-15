@@ -24,13 +24,28 @@ def upgrade() -> None:
         sa.Column("content_id", sa.String(length=48), nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=False),
         sa.Column("text", sa.String(length=500), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
         sa.ForeignKeyConstraint(["content_id"], ["contents.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index("ix_comments_content_created", "comments", ["content_id", "created_at"], unique=False)
+    op.create_index(
+        "ix_comments_content_created",
+        "comments",
+        ["content_id", "created_at"],
+        unique=False,
+    )
 
 
 def downgrade() -> None:

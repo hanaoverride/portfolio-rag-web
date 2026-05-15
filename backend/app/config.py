@@ -9,7 +9,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 _ENV_FILE = _PROJECT_ROOT / ".env"
-_DEFAULT_DATABASE_URL = "postgresql+psycopg://postgres:postgres@localhost:5432/portfolio"
+_DEFAULT_DATABASE_URL = (
+    "postgresql+psycopg://postgres:postgres@localhost:5432/portfolio"
+)
 
 
 class Settings(BaseSettings):
@@ -45,19 +47,26 @@ class Settings(BaseSettings):
     google_client_ids: Any = Field(default_factory=list)
 
     openai_api_key: Optional[SecretStr] = Field(default=None)
-    openai_api_base: Optional[str] = Field(default=None, validation_alias=AliasChoices("OPENAI_API_BASE", "OPENAI_BASE_URL"))
+    openai_api_base: Optional[str] = Field(
+        default=None,
+        validation_alias=AliasChoices("OPENAI_API_BASE", "OPENAI_BASE_URL"),
+    )
     openrouter_api_key: Optional[SecretStr] = Field(default=None)
     openrouter_base_url: str = Field(default="https://openrouter.ai/api/v1")
     openrouter_model: str = Field(default="gpt-oss-120b")
 
     qdrant_url: Optional[str] = Field(default=None)
     qdrant_api_key: Optional[SecretStr] = Field(default=None)
-    qdrant_collection_name: str = Field(default="portfolio", min_length=1, max_length=80)
+    qdrant_collection_name: str = Field(
+        default="portfolio", min_length=1, max_length=80
+    )
 
     demo_mode: bool = Field(default=False)
     cache_ttl_seconds: int = Field(default=300, ge=30, le=3600)
 
-    @field_validator("allowed_origins", "trusted_hosts", "google_client_ids", mode="before")
+    @field_validator(
+        "allowed_origins", "trusted_hosts", "google_client_ids", mode="before"
+    )
     @classmethod
     def _split_comma_separated(cls, value: Any) -> List[str] | None:
         if isinstance(value, str):
@@ -78,8 +87,12 @@ class Settings(BaseSettings):
     @field_validator("database_url", mode="before")
     @classmethod
     def _validate_database_url(cls, v: str) -> str:
-        if v and not v.startswith(("postgresql+psycopg://", "postgresql://", "sqlite://")):
-            raise ValueError("DATABASE_URL must use postgresql+psycopg:// or postgresql://")
+        if v and not v.startswith(
+            ("postgresql+psycopg://", "postgresql://", "sqlite://")
+        ):
+            raise ValueError(
+                "DATABASE_URL must use postgresql+psycopg:// or postgresql://"
+            )
         return v
 
 
