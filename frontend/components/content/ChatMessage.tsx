@@ -1,4 +1,8 @@
+"use client";
+
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 type Message = {
   id: string;
@@ -22,12 +26,16 @@ const ChatMessage: React.FC<{ message: Message }> = ({ message }) => {
           maxWidth: '80%',
           padding: '10px 12px',
           borderRadius: 12,
-          background: isUser ? '#3b82f6' : '#e5e7eb',
+          background: isUser ? '#3b82f6' : '#f3f4f6',
           color: isUser ? '#fff' : '#111827',
           border: '1px solid rgba(0,0,0,0.05)',
         }}
       >
-        <div style={{ whiteSpace: 'pre-wrap' }}>{message.content}</div>
+        <div className="markdown-content" style={{ fontSize: '0.95rem', lineHeight: '1.5' }}>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {message.content}
+          </ReactMarkdown>
+        </div>
         <div style={{ fontSize: 11, opacity: 0.7, marginTop: 6, textAlign: 'right' }}>
           {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </div>
@@ -37,3 +45,4 @@ const ChatMessage: React.FC<{ message: Message }> = ({ message }) => {
 };
 
 export default ChatMessage;
+
