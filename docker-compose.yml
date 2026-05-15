@@ -23,7 +23,6 @@ services:
       - GOOGLE_CLIENT_IDS=[]
     volumes:
       - ./backend:/app
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
     depends_on:
       postgres:
         condition: service_healthy
