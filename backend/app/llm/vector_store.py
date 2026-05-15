@@ -30,7 +30,13 @@ class QdrantVectorStore(VectorStoreProtocol):
                 )
         return self._client
 
-    async def upsert(self, texts: List[str], embeddings: List[List[float]], metadatas: Optional[List[dict[str, Any]]] = None) -> None:
+    async def upsert(
+        self, 
+        texts: List[str], 
+        embeddings: List[List[float]], 
+        metadatas: Optional[List[dict[str, Any]]] = None,
+        ids: Optional[List[str]] = None
+    ) -> None:
         client = await self._get_client()
         points = []
         for i, (text, vector) in enumerate(zip(texts, embeddings)):
@@ -38,8 +44,10 @@ class QdrantVectorStore(VectorStoreProtocol):
             if metadatas and i < len(metadatas):
                 payload.update(metadatas[i])
             
+            point_id = ids[i] if ids and i < len(ids) else str(uuid.uuid4())
+            
             points.append(qmodels.PointStruct(
-                id=str(uuid.uuid4()),
+                id=point_id,
                 vector=vector,
                 payload=payload
             ))
