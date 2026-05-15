@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState, useCallback } from "react";
-import { GoogleLogin } from '@react-oauth/google';
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -425,13 +425,13 @@ function LoginPageInner() {
             </div>
 
             <GoogleLogin
-              onSuccess={async (credentialResponse: any) => {
+              onSuccess={async (credentialResponse: CredentialResponse) => {
                 const credential = credentialResponse?.credential;
                 if (credential) {
                   try {
                     await loginWithGoogle(credential);
                     router.push(redirect || '/');
-                  } catch (err) {
+                  } catch {
                     setFormErrors({ general: 'Google 로그인에 실패했습니다' });
                   }
                 }

@@ -29,7 +29,7 @@ describe("NotFound", () => {
 
   it("renders Layer logo link", () => {
     render(<NotFound />);
-    const logoLink = screen.getByText("Layer");
+    const logoLink = screen.getByAltText("Layer");
     expect(logoLink).toBeInTheDocument();
     expect(logoLink.closest("a")).toHaveAttribute("href", "/");
   });

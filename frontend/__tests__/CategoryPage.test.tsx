@@ -17,6 +17,27 @@ vi.mock("lucide-react", () => ({
   TrendingUp: () => <svg data-testid="icon-trending-up" />,
 }));
 
+vi.mock("@/lib/hooks/useAuth", () => ({
+  useAuth: vi.fn(() => ({ isAuthenticated: true })),
+}));
+
+vi.mock("@/lib/hooks/useBookmarks", () => ({
+  useBookmarks: vi.fn(() => ({ 
+    bookmarkedIds: new Set(),
+    addBookmark: vi.fn(),
+    removeBookmark: vi.fn()
+  })),
+}));
+
+vi.mock("@/lib/hooks", () => ({
+  useAuth: vi.fn(() => ({ isAuthenticated: true })),
+  useBookmarks: vi.fn(() => ({ 
+    bookmarkedIds: new Set(),
+    addBookmark: vi.fn(),
+    removeBookmark: vi.fn()
+  })),
+}));
+
 vi.mock("@/components/common/ContentCard", () => ({
   ContentCard: ({ content }: { content: Content }) => (
     <div data-testid={`content-card-${content.id}`}>{content.title}</div>
@@ -127,7 +148,8 @@ describe("CategoryPage", () => {
       expect(screen.getByText("Technology")).toBeInTheDocument();
     });
 
-    expect(screen.getByText("총 2개의 콘텐츠")).toBeInTheDocument();
+    const totalText = await screen.findByText(/총/);
+    expect(totalText.parentElement).toHaveTextContent(/총\s*2\s*개의 콘텐츠/);
     expect(screen.getByTestId("content-card-1")).toBeInTheDocument();
     expect(screen.getByTestId("content-card-2")).toBeInTheDocument();
   });

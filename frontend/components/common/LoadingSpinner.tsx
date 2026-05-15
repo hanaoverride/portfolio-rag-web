@@ -6,34 +6,27 @@ interface LoadingSpinnerProps {
 }
 
 const sizeMap = {
-  sm: "h-5 w-5",
-  md: "h-8 w-8",
-  lg: "h-12 w-12",
-} as const;
-
-const trackSizeMap = {
-  sm: "h-5 w-5",
+  sm: "h-4 w-4",
   md: "h-8 w-8",
   lg: "h-12 w-12",
 } as const;
 
 export function LoadingSpinner({ size = "md", className }: LoadingSpinnerProps) {
+  const sizeClass = sizeMap[size];
+  
   return (
-    <div className={cn("flex items-center justify-center", className)}>
-      <div className="relative">
+    <div 
+      className={cn("flex items-center justify-center", sizeClass, className)} 
+      aria-label="로딩 중"
+    >
+      <div className="relative h-full w-full">
         {/* Track */}
         <div
-          className={cn(
-            "rounded-full border-2 border-primary-100 dark:border-primary-900/40",
-            trackSizeMap[size]
-          )}
+          className="rounded-full border-2 border-primary-100 dark:border-primary-900/40 h-full w-full"
         />
         {/* Spinner */}
         <div
-          className={cn(
-            "absolute inset-0 rounded-full border-2 border-transparent border-t-primary-500 animate-spin",
-            sizeMap[size]
-          )}
+          className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary-500 animate-spin h-full w-full"
         />
       </div>
     </div>

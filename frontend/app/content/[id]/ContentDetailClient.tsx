@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { ArrowLeft, Eye, Clock } from "lucide-react";
 import Link from "next/link";
 import type { Content, TableOfContentsItem } from "@/lib/api/types";

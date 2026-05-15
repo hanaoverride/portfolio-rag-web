@@ -6,7 +6,6 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { noticesApi, notificationsApi, CreateNoticeRequest, CreateNotificationRequest } from '@/lib/api';
 import { useToast } from '@/lib/hooks/useToast';
 import { 
-  LayoutDashboard, 
   Bell, 
   FileText, 
   Send, 
@@ -60,7 +59,7 @@ export default function AdminPage() {
       await notificationsApi.create(notifData);
       showToast('알림이 성공적으로 전송되었습니다.', 'success');
       setNotifData({ title: '', message: '', userId: undefined });
-    } catch (error) {
+    } catch {
       showToast('알림 전송에 실패했습니다.', 'error');
     } finally {
       setIsSubmitting(false);
@@ -76,7 +75,7 @@ export default function AdminPage() {
       await noticesApi.create(noticeData);
       showToast('공지사항이 등록되었습니다.', 'success');
       setNoticeData({ title: '', content: '', isImportant: false });
-    } catch (error) {
+    } catch {
       showToast('공지사항 등록에 실패했습니다.', 'error');
     } finally {
       setIsSubmitting(false);

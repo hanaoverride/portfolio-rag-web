@@ -11,7 +11,7 @@ import { FormattedDate } from "@/components/common/FormattedDate";
 import { useToast } from "@/lib/hooks/useToast";
 
 export default function NoticesPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const { showToast } = useToast();
   const [notices, setNotices] = useState<Notice[]>([]);
   const [isLoading, setIsLoading] = useState(true);

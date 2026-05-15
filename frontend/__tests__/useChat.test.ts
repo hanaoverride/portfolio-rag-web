@@ -2,15 +2,25 @@ import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import type { ChatCompletionResponse } from '@/lib/api/types';
 
-const mockCreateChatCompletion = vi.fn();
+const mockCreateChatStream = vi.fn();
 
 vi.mock('@/lib/api/chat', () => ({
-  createChatCompletion: mockCreateChatCompletion,
+  createChatStream: mockCreateChatStream,
 }));
 
 vi.mock('@/lib/hooks/useAuth', () => ({
   getAuthToken: vi.fn(() => 'mock-token'),
 }));
+
+// Helper to mock ReadableStream for vitest/jsdom
+const createMockStream = (text: string) => {
+  return new ReadableStream({
+    start(controller) {
+      controller.enqueue(new TextEncoder().encode(text));
+      controller.close();
+    },
+  });
+};
 
 const mockResponse: ChatCompletionResponse = {
   id: 'test-id',
@@ -45,14 +55,13 @@ describe('useChat', () => {
   });
 
   it('rapid send includes both messages', async () => {
-    mockCreateChatCompletion.mockResolvedValue(mockResponse);
+    mockCreateChatStream.mockImplementation(() => Promise.resolve(createMockStream('mock reply')));
 
     const { result } = renderHook(() => useChat());
 
-    const p1 = result.current.sendMessage('first');
-    const p2 = result.current.sendMessage('second');
-
     await act(async () => {
+      const p1 = result.current.sendMessage('first');
+      const p2 = result.current.sendMessage('second');
       await Promise.all([p1, p2]);
     });
 
@@ -61,19 +70,14 @@ describe('useChat', () => {
     expect(userMessages[0].content).toBe('first');
     expect(userMessages[1].content).toBe('second');
 
-    expect(mockCreateChatCompletion).toHaveBeenCalledTimes(2);
+    expect(mockCreateChatStream).toHaveBeenCalledTimes(2);
 
-    const secondCallMessages = mockCreateChatCompletion.mock.calls[1][0];
-    const secondCallContents = secondCallMessages.map(
-      (m: { role: string; content: string }) => m.content,
-    );
-    expect(secondCallContents).toContain('first');
-    expect(secondCallContents).toContain('second');
-    expect(secondCallMessages).toHaveLength(2);
+    const secondCallMessages = mockCreateChatStream.mock.calls[1][0];
+    expect(secondCallMessages).toHaveLength(3); // [user1, assistant1, user2]
   });
 
   it('error rollback removes failed message', async () => {
-    mockCreateChatCompletion.mockRejectedValueOnce(new Error('API Error'));
+    mockCreateChatStream.mockRejectedValueOnce(new Error('API Error'));
 
     const { result } = renderHook(() => useChat());
 
@@ -86,7 +90,7 @@ describe('useChat', () => {
   });
 
   it('clearMessages empties everything', async () => {
-    mockCreateChatCompletion.mockResolvedValue(mockResponse);
+    mockCreateChatStream.mockImplementation(() => Promise.resolve(createMockStream('mock reply')));
 
     const { result } = renderHook(() => useChat());
 

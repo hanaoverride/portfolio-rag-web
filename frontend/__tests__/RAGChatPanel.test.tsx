@@ -41,8 +41,8 @@ describe('RAGChatPanel', () => {
     // Render the component with content context
     render(<RAGChatPanel contentId="content-123" contentTitle="Demo Content" />);
 
-    // Open the chat panel by clicking the FAB (text "RAG")
-    const fab = screen.getByText('RAG');
+    // Open the chat panel by clicking the FAB
+    const fab = screen.getByLabelText('Open RAG chat');
     fireEvent.click(fab);
 
     // The input placeholder should be visible
@@ -51,11 +51,11 @@ describe('RAGChatPanel', () => {
 
     // Type a message and send
     fireEvent.change(input, { target: { value: 'Test message' } });
-    const sendBtn = screen.getByText('Send');
+    const sendBtn = screen.getByLabelText('Send message');
     fireEvent.click(sendBtn);
 
     // Ensure the input is cleared after sending
-    await waitFor(() => expect(input.value).toBe(''));
+    await waitFor(() => expect((input as HTMLInputElement).value).toBe(''));
   });
 
   it('renders structured content as text, not JSON', () => {
@@ -71,7 +71,7 @@ describe('RAGChatPanel', () => {
     });
 
     render(<RAGChatPanel contentId="content-123" />);
-    const fab = screen.getByText('RAG');
+    const fab = screen.getByLabelText('Open RAG chat');
     fireEvent.click(fab);
 
     // The inner '.content' field should be extracted and displayed as text
@@ -93,7 +93,7 @@ describe('RAGChatPanel', () => {
     });
 
     render(<RAGChatPanel />);
-    const fab = screen.getByText('RAG');
+    const fab = screen.getByLabelText('Open RAG chat');
     fireEvent.click(fab);
 
     expect(screen.getByText('plain text')).toBeInTheDocument();
@@ -112,7 +112,7 @@ describe('RAGChatPanel', () => {
     });
 
     render(<RAGChatPanel />);
-    const fab = screen.getByText('RAG');
+    const fab = screen.getByLabelText('Open RAG chat');
     fireEvent.click(fab);
 
     // Should not crash and should NOT render raw JSON

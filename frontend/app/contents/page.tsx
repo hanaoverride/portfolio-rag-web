@@ -11,7 +11,7 @@ import type { Category } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 
 export default function ContentsPage() {
-  const { contents, isLoading, error, fetchContents, clearError } = useContents();
+  const { contents, isLoading, error, fetchContents } = useContents();
   const { isAuthenticated } = useAuth();
   const { bookmarkedIds, addBookmark, removeBookmark } = useBookmarks();
   

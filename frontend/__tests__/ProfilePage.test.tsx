@@ -55,6 +55,8 @@ const mockUser = {
   id: 1,
   email: "test@example.com",
   displayName: "테스트 사용자",
+  isAdmin: false,
+  role: "user" as const,
   createdAt: "2024-01-15T09:30:00Z",
 };
 
@@ -188,7 +190,14 @@ describe("ProfilePage", () => {
   describe("user without createdAt", () => {
     it("does not show created date when createdAt is undefined", () => {
       mockUseAuth.mockReturnValue({
-        user: { id: 1, email: "test@example.com", displayName: "테스트" },
+        user: {
+          id: 1,
+          email: "test@example.com",
+          displayName: "테스트",
+          isAdmin: false,
+          role: "user" as const,
+          createdAt: "",
+        },
         isAuthenticated: true,
         isLoading: false,
         error: null,

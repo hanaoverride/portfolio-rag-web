@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { notificationsApi, Notification } from '@/lib/api';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { Bell, Info, AlertCircle, CheckCircle2, X } from 'lucide-react';
+import { Bell, Info, X } from 'lucide-react';
 
 interface NotificationListProps {
   onClose?: () => void;

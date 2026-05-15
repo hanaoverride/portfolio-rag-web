@@ -39,7 +39,14 @@ describe('useAuth', () => {
   });
 
   it('sets user after successful login', async () => {
-    const mockUser = { id: 1, email: 'test@test.com', displayName: 'Test' };
+    const mockUser = {
+      id: 1,
+      email: "test@test.com",
+      displayName: "Test",
+      isAdmin: false,
+      role: "user" as const,
+      createdAt: new Date().toISOString(),
+    };
     vi.mocked(loginWithEmail).mockResolvedValueOnce({
       accessToken: 'token',
       tokenType: 'Bearer',
@@ -57,7 +64,14 @@ describe('useAuth', () => {
   });
 
   it('calls /auth/me when result.user is missing', async () => {
-    const mockUser = { id: 1, email: 'test@test.com', displayName: 'Test' };
+    const mockUser = {
+      id: 1,
+      email: "test@test.com",
+      displayName: "Test",
+      isAdmin: false,
+      role: "user" as const,
+      createdAt: new Date().toISOString(),
+    };
     vi.mocked(loginWithEmail).mockResolvedValueOnce({
       accessToken: 'token',
       tokenType: 'Bearer',
@@ -91,7 +105,14 @@ describe('useAuth', () => {
   });
 
   it('calls /auth/me when result.user is missing on register', async () => {
-    const mockUser = { id: 1, email: 'new@test.com', displayName: 'NewUser' };
+    const mockUser = {
+      id: 1,
+      email: "new@test.com",
+      displayName: "NewUser",
+      isAdmin: false,
+      role: "user" as const,
+      createdAt: new Date().toISOString(),
+    };
     vi.mocked(fetchCurrentUser).mockResolvedValueOnce(mockUser);
 
     const { register } = await import('@/lib/api/auth');
