@@ -37,7 +37,11 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
         expires_delta or timedelta(minutes=settings.jwt_access_token_exp_minutes)
     )
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, settings.jwt_secret_key.get_secret_value(), algorithm=settings.jwt_algorithm)
+    return jwt.encode(
+        to_encode,
+        settings.jwt_secret_key.get_secret_value(),
+        algorithm=settings.jwt_algorithm,
+    )
 
 
 def decode_token(token: str) -> dict:
