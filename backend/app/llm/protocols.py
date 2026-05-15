@@ -24,3 +24,30 @@ class ChatServiceProtocol(ABC):
     @abstractmethod
     async def chat_with_rag(self, messages: list[ChatMessage], context: RAGContext) -> str:
         ...
+
+
+class EmbeddingServiceProtocol(ABC):
+    @abstractmethod
+    async def get_embedding(self, text: str) -> list[float]:
+        ...
+
+    @abstractmethod
+    async def get_embeddings(self, texts: list[str]) -> list[list[float]]:
+        ...
+
+
+@dataclass
+class SearchResult:
+    content: str
+    metadata: dict[str, Any] = field(default_factory=dict)
+    score: float = 0.0
+
+
+class VectorStoreProtocol(ABC):
+    @abstractmethod
+    async def upsert(self, texts: list[str], embeddings: list[list[float]], metadatas: list[dict[str, Any]] | None = None) -> None:
+        ...
+
+    @abstractmethod
+    async def search(self, query_embedding: list[float], limit: int = 5) -> list[SearchResult]:
+        ...
