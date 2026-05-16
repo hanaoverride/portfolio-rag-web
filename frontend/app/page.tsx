@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { HeroSlider } from "@/components/home/HeroSlider";
 import { ContentGrid } from "@/components/home/ContentGrid";
 import { RecommendedYouTubers } from "@/components/home/RecommendedYouTubers";
+import { Statistics } from "@/components/home/Statistics";
 import { LatestContent } from "@/components/home/LatestContent";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
@@ -123,6 +124,8 @@ export default function HomePage() {
         ) : (
           <RecommendedYouTubers youtubers={youtubers} />
         )}
+
+        <Statistics />
 
         {contentsLoading ? (
           <LoadingSpinner size="lg" className="py-10" />

@@ -14,7 +14,7 @@ def _patch_settings(monkeypatch, settings_obj):
 
 
 def test_stub_chat_service_when_demo_mode_true(monkeypatch):
-    from app.llm.stub_chat_service import get_chat_service, StubChatService
+    from app.llm.stub_chat_service import StubChatService, get_chat_service
 
     # Ensure we simulate demo mode via runtime settings
     class SettingsLike:

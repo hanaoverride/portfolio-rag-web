@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import sys
-from unittest.mock import MagicMock
 from typing import AsyncGenerator
+from unittest.mock import MagicMock
 
 import pytest
 import pytest_asyncio

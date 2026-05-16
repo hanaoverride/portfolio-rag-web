@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter
 
+from .admin import router as admin_router
 from .auth import router as auth_router
 from .bookmarks import router as bookmarks_router
 from .categories import router as categories_router
@@ -12,8 +13,8 @@ from .export import router as export_router
 from .health import router as health_router
 from .notices import router as notices_router
 from .notifications import router as notifications_router
+from .statistics import router as statistics_router
 from .youtubers import router as youtubers_router
-from .admin import router as admin_router
 
 router = APIRouter()
 
@@ -29,3 +30,5 @@ router.include_router(youtubers_router)
 router.include_router(notices_router, prefix="/notices", tags=["notices"])
 router.include_router(notifications_router)
 router.include_router(admin_router)
+router.include_router(statistics_router)
+

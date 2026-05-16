@@ -3,15 +3,15 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.data.database import get_db
 from app.data.repository import get_categories, get_contents
 from app.data.schemas import (
+    Author,
     CategoryResponse,
     ContentListResponse,
     ContentResponse,
-    Author,
     TableOfContentsItem,
 )
-from app.data.database import get_db
 
 router = APIRouter(prefix="/categories", tags=["categories"])
 
@@ -63,6 +63,8 @@ async def get_category(slug: str, session: AsyncSession = Depends(get_db)):
 @router.get("/{slug}/contents", response_model=ContentListResponse)
 async def get_category_contents(
     slug: str,
+    sort_by: str = Query("views", description="Sort by field (views, created_at)"),
+    order: str = Query("desc", description="Sort order (asc, desc)"),
     offset: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     session: AsyncSession = Depends(get_db),
@@ -87,6 +89,14 @@ async def get_category_contents(
     filtered = [
         c for c in all_contents if slug.lower() in [cat.lower() for cat in c.category]
     ]
+
+    # Apply sorting
+    reverse = order.lower() == "desc"
+    if sort_by == "views":
+        filtered.sort(key=lambda x: (x.views, x.created_at), reverse=reverse)
+    elif sort_by == "created_at":
+        filtered.sort(key=lambda x: x.created_at, reverse=reverse)
+
     total = len(filtered)
     paginated = filtered[offset : offset + limit]
 

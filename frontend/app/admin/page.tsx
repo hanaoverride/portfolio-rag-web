@@ -11,15 +11,18 @@ import {
   Send, 
   PlusCircle, 
   ShieldCheck,
-  AlertTriangle
+  AlertTriangle,
+  LayoutDashboard
 } from 'lucide-react';
+import { Statistics } from '@/components/home/Statistics';
+
 
 export default function AdminPage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const { showToast } = useToast();
   
-  const [activeTab, setActiveTab] = useState<'notification' | 'notice'>('notification');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'notification' | 'notice'>('dashboard');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form states
@@ -83,7 +86,7 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8 bg-[#0a0a0c] text-white">
+    <div className="dark min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8 bg-[#0a0a0c] text-white">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-4 mb-10">
@@ -100,6 +103,17 @@ export default function AdminPage() {
 
         {/* Tabs */}
         <div className="flex gap-2 p-1 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl mb-8">
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all ${
+              activeTab === 'dashboard' 
+                ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' 
+                : 'text-white/60 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <LayoutDashboard className="w-5 h-5" />
+            <span className="font-medium">대시보드</span>
+          </button>
           <button
             onClick={() => setActiveTab('notification')}
             className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all ${
@@ -125,9 +139,42 @@ export default function AdminPage() {
         </div>
 
         {/* Forms Container */}
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
-          {activeTab === 'notification' ? (
-            <form onSubmit={handleSendNotification} className="space-y-6">
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden">
+          {activeTab === 'dashboard' ? (
+            <div className="p-4">
+               <Statistics />
+               <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                  <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
+                    <h3 className="text-lg font-bold mb-2">빠른 관리</h3>
+                    <div className="space-y-3">
+                      <button 
+                        onClick={() => setActiveTab('notification')}
+                        className="w-full text-left px-4 py-2 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-all text-sm font-medium"
+                      >
+                        신규 알림 발송하기
+                      </button>
+                      <button 
+                        onClick={() => setActiveTab('notice')}
+                        className="w-full text-left px-4 py-2 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-all text-sm font-medium"
+                      >
+                        중요 공지 등록하기
+                      </button>
+                    </div>
+                  </div>
+                  <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
+                    <h3 className="text-lg font-bold mb-2">시스템 상태</h3>
+                    <div className="flex items-center gap-2 text-emerald-400 text-sm">
+                      <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      모든 서버가 정상적으로 운영 중입니다.
+                    </div>
+                    <div className="mt-4 text-xs text-white/40">
+                      최지막 활동 확인: 방금 전
+                    </div>
+                  </div>
+               </div>
+            </div>
+          ) : activeTab === 'notification' ? (
+            <form onSubmit={handleSendNotification} className="p-8 space-y-6">
               <div className="flex items-center gap-2 text-indigo-400 mb-2">
                 <Send className="w-5 h-5" />
                 <h2 className="text-xl font-semibold text-white">시스템 알림 전송</h2>

@@ -48,7 +48,7 @@ export default function CategoryPageClient({ slug, categoryName }: Props) {
   const { bookmarkedIds, addBookmark, removeBookmark } = useBookmarks();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sort, setSort] = useState<SortOption>("latest");
+  const [sort, setSort] = useState<SortOption>("views");
   const [offset, setOffset] = useState(0);
 
 

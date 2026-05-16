@@ -1,10 +1,11 @@
 """Tests for auth endpoints."""
 
-import pytest
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from app.data.schemas import UserProfile, AuthTokens
+import pytest
+
+from app.data.schemas import AuthTokens, UserProfile
 
 
 @pytest.mark.asyncio
@@ -20,6 +21,8 @@ async def test_login_email_rejects_inactive_user(async_client, async_session):
     mock_user.avatar_url = None
     mock_user.google_sub = None
     mock_user.last_login_at = None
+    mock_user.is_admin = False
+    mock_user.role = "user"
     mock_user.created_at = datetime.now(timezone.utc)
 
     with patch(
@@ -44,12 +47,13 @@ async def test_login_google_rejects_inactive_user(async_client, async_session):
     mock_user = MagicMock(spec=User)
     mock_user.id = 1
     mock_user.email = "inactive@test.com"
-    mock_user.password_hash = None
     mock_user.is_active = False
     mock_user.display_name = "Inactive User"
     mock_user.avatar_url = None
     mock_user.google_sub = "google_123"
     mock_user.last_login_at = None
+    mock_user.is_admin = False
+    mock_user.role = "user"
     mock_user.created_at = datetime.now(timezone.utc)
 
     with patch(
@@ -88,6 +92,8 @@ async def test_login_email_accepts_active_user(async_client, async_session):
     mock_user.avatar_url = None
     mock_user.google_sub = None
     mock_user.last_login_at = None
+    mock_user.is_admin = False
+    mock_user.role = "user"
     mock_user.created_at = datetime.now(timezone.utc)
 
     with patch(

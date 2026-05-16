@@ -1,9 +1,11 @@
-from typing import List, Optional, Any
 import uuid
+from typing import Any, List, Optional
+
 from qdrant_client import AsyncQdrantClient
 from qdrant_client.http import models as qmodels
-from app.llm.protocols import VectorStoreProtocol, SearchResult
+
 from app.config import settings
+from app.llm.protocols import SearchResult, VectorStoreProtocol
 
 
 class QdrantVectorStore(VectorStoreProtocol):

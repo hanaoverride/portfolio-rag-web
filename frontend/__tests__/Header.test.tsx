@@ -142,11 +142,7 @@ describe("Header", () => {
       (categoriesApi.getCategories as ReturnType<typeof vi.fn>).mockResolvedValue(mockCategories);
       render(<Header categories={[]} />);
 
-      await waitFor(() => {
-        expect(categoriesApi.getCategories).toHaveBeenCalled();
-      });
-
-      const button = screen.getByRole("button", { name: /카테고리/ });
+      const button = await screen.findByRole("button", { name: /카테고리/ });
       expect(button).toBeInTheDocument();
     });
 

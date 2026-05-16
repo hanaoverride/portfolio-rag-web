@@ -9,7 +9,6 @@ from typing import Generic, List, Optional, TypeVar
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, constr
 from pydantic.alias_generators import to_camel
 
-
 T = TypeVar("T")
 
 
@@ -246,3 +245,12 @@ class NotificationResponse(CamelModel):
     is_read: bool
     created_at: datetime
     user_id: Optional[int] = None
+
+
+class StatisticsResponse(CamelModel):
+    total_bookmarks: int = Field(ge=0)
+    total_comments: int = Field(ge=0)
+    total_contents: int = Field(ge=0)
+    total_views: int = Field(ge=0)
+    total_youtubers: int = Field(ge=0)
+

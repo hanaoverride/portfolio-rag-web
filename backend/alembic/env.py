@@ -1,19 +1,19 @@
 """Alembic environment for managing SQLAlchemy migrations."""
 
+import logging
 import os
 import sys
-import logging
 
 # Add the parent directory to sys.path so we can import the 'app' package
 sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 from logging.config import fileConfig
 
-from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from app.main import settings
-from app.data.database import Base
+from alembic import context
 from app.data import models  # noqa: F401
+from app.data.database import Base
+from app.main import settings
 
 # Interpret the config file for Python logging and Alembic context.
 config = context.config

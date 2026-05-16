@@ -3,9 +3,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.data.database import get_db
 from app.data.repository import get_youtubers
 from app.data.schemas import PaginatedYouTubersResponse, YouTuberResponse
-from app.data.database import get_db
 
 router = APIRouter(prefix="/youtubers", tags=["youtubers"])
 

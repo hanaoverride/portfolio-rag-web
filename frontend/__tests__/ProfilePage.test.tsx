@@ -28,6 +28,16 @@ vi.mock("@/lib/api/categories", () => ({
   getCategories: vi.fn().mockResolvedValue([]),
 }));
 
+vi.mock("@/lib/api/statistics", () => ({
+  getMyStatistics: vi.fn().mockResolvedValue({
+    totalBookmarks: 10,
+    totalComments: 5,
+    totalContents: 0,
+    totalViews: 0,
+    totalYoutubers: 0,
+  }),
+}));
+
 vi.mock("next/link", () => ({
   default: ({
     href,
@@ -140,50 +150,49 @@ describe("ProfilePage", () => {
       });
     });
 
-    it("renders profile page heading", () => {
+    it("renders profile page heading", async () => {
       render(<ProfilePage />);
 
-      expect(screen.getByText("프로필")).toBeInTheDocument();
+      expect(await screen.findByText("프로필")).toBeInTheDocument();
       expect(screen.getByText("내 계정 정보")).toBeInTheDocument();
     });
 
-    it("displays user display name", () => {
+    it("displays user display name", async () => {
       render(<ProfilePage />);
 
-      expect(screen.getByTestId("profile-display-name")).toHaveTextContent(
+      expect(await screen.findByTestId("profile-display-name")).toHaveTextContent(
         "테스트 사용자"
       );
     });
 
-    it("displays user email", () => {
+    it("displays user email", async () => {
       render(<ProfilePage />);
 
-      expect(screen.getByTestId("profile-email")).toHaveTextContent(
+      expect(await screen.findByTestId("profile-email")).toHaveTextContent(
         "test@example.com"
       );
     });
 
-    it("displays user created date", () => {
+    it("displays user created date", async () => {
       render(<ProfilePage />);
 
-      expect(screen.getByTestId("profile-created-at")).toBeInTheDocument();
+      expect(await screen.findByTestId("profile-created-at")).toBeInTheDocument();
     });
 
-    it("displays field labels", () => {
+    it("displays field labels", async () => {
       render(<ProfilePage />);
 
-      expect(screen.getByText("표시 이름")).toBeInTheDocument();
+      expect(await screen.findByText("표시 이름")).toBeInTheDocument();
       expect(screen.getByText("이메일")).toBeInTheDocument();
       expect(screen.getByText("가입일")).toBeInTheDocument();
     });
 
-    it("displays activity statistics section", () => {
+    it("displays activity statistics section", async () => {
       render(<ProfilePage />);
 
-      expect(screen.getByText("활동 통계")).toBeInTheDocument();
-      expect(
-        screen.getByText("북마크 수와 댓글 수는 추후 구현 예정입니다.")
-      ).toBeInTheDocument();
+      expect(await screen.findByText("내 활동 통계")).toBeInTheDocument();
+      expect(screen.getByText("북마크")).toBeInTheDocument();
+      expect(screen.getByText("댓글")).toBeInTheDocument();
     });
   });
 
@@ -253,7 +262,7 @@ describe("ProfilePage", () => {
       expect(container.firstChild?.nodeName).not.toBe("MAIN");
     });
 
-    it("loads authenticated state without MainLayout", () => {
+    it("loads authenticated state without MainLayout", async () => {
       mockUseAuth.mockReturnValue({
         user: mockUser,
         isAuthenticated: true,
@@ -267,7 +276,7 @@ describe("ProfilePage", () => {
       });
 
       const { container } = render(<ProfilePage />);
-      expect(screen.getByText("프로필")).toBeInTheDocument();
+      expect(await screen.findByText("프로필")).toBeInTheDocument();
       expect(container.firstChild?.nodeName).not.toBe("MAIN");
     });
   });

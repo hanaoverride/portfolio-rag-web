@@ -8,8 +8,9 @@ Create Date: 2025-11-28 00:00:00
 
 from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
+
+from alembic import op
 
 revision = "0002"
 down_revision = "cf93e56fe31b"

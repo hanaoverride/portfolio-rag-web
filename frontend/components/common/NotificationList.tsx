@@ -4,7 +4,9 @@ import React, { useEffect, useState } from 'react';
 import { notificationsApi, Notification } from '@/lib/api';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { Bell, Info, X } from 'lucide-react';
+import { Bell, Info, X, Trash2 } from 'lucide-react';
+import { useToast } from '@/lib/hooks/useToast';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 interface NotificationListProps {
   onClose?: () => void;
@@ -12,7 +14,9 @@ interface NotificationListProps {
 
 export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+   const [isLoading, setIsLoading] = useState(true);
+   const { showToast } = useToast();
+   useAuth();
 
   const fetchNotifications = async () => {
     try {
@@ -40,12 +44,16 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
   };
 
   const handleDeleteAll = async () => {
+    if (!confirm('모든 알림을 삭제하시겠습니까?')) return;
+    
     try {
       await notificationsApi.deleteAll();
       setNotifications([]);
       window.dispatchEvent(new CustomEvent('notificationsUpdated'));
+      showToast('모든 알림이 삭제되었습니다.', 'success');
     } catch (error) {
       console.error('Failed to delete all notifications:', error);
+      showToast('알림 삭제에 실패했습니다.', 'error');
     }
   };
 
@@ -125,6 +133,7 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
             onClick={handleDeleteAll}
             className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-semibold transition-colors flex items-center justify-center gap-2 mx-auto"
           >
+            <Trash2 className="w-4 h-4" />
             모든 알림 삭제
           </button>
         </div>

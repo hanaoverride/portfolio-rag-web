@@ -2,13 +2,14 @@
 
 import asyncio
 import logging
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .database import get_async_engine
-from .seed_data import CATEGORIES, YOUTUBERS, CONTENTS
 from ..auth.service import get_password_hash
+from .database import get_async_engine
 from .models import User, UserRole
+from .seed_data import CATEGORIES, CONTENTS, YOUTUBERS
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -36,8 +37,9 @@ async def seed_categories(session: AsyncSession) -> None:
 
 async def seed_youtubers(session: AsyncSession) -> None:
     """Seed YouTubers if they don't exist."""
-    from sqlalchemy import text
     import json
+
+    from sqlalchemy import text
 
     # Removed check to allow upsert
 
@@ -66,9 +68,10 @@ async def seed_youtubers(session: AsyncSession) -> None:
 
 async def seed_contents(session: AsyncSession) -> None:
     """Seed contents if they don't exist."""
-    from sqlalchemy import text
-    from datetime import datetime
     import json
+    from datetime import datetime
+
+    from sqlalchemy import text
 
     # Removed check to allow upsert
 
@@ -99,7 +102,6 @@ async def seed_contents(session: AsyncSession) -> None:
                 author_name = EXCLUDED.author_name,
                 author_avatar = EXCLUDED.author_avatar,
                 duration = EXCLUDED.duration,
-                views = EXCLUDED.views,
                 created_at = EXCLUDED.created_at,
                 is_new = EXCLUDED.is_new,
                 table_of_contents = EXCLUDED.table_of_contents,

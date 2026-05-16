@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye, Clock } from "lucide-react";
 import Link from "next/link";
+import { formatViews } from "@/lib/utils";
 import type { Content, TableOfContentsItem } from "@/lib/api/types";
+import { incrementViews } from "@/lib/api/contents";
 import { VideoPlayer } from "@/components/content/VideoPlayer";
 import RAGChatPanel from '@/components/content/RAGChatPanel';
 import { TableOfContents } from "@/components/content/TableOfContents";
@@ -22,15 +25,7 @@ function formatDuration(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-function formatViews(views: number): string {
-  if (views >= 10000) {
-    return `${(views / 10000).toFixed(1)}만`;
-  }
-  if (views >= 1000) {
-    return `${(views / 1000).toFixed(1)}천`;
-  }
-  return views.toString();
-}
+
 
 interface ContentDetailClientProps {
   content: Content;
@@ -38,9 +33,22 @@ interface ContentDetailClientProps {
 
 export function ContentDetailClient({ content }: ContentDetailClientProps) {
   const [activeTimestamp, setActiveTimestamp] = useState<number | undefined>(undefined);
+  const router = useRouter();
   const { isAuthenticated } = useAuth();
   const { bookmarkedIds, addBookmark, removeBookmark } = useBookmarks();
   const isBookmarked = bookmarkedIds.has(content.id);
+
+  useEffect(() => {
+    const trackView = async () => {
+      try {
+        await incrementViews(content.id);
+        router.refresh();
+      } catch (error) {
+        console.error("Failed to increment views:", error);
+      }
+    };
+    trackView();
+  }, [content.id, router]);
 
 
 

@@ -7,8 +7,10 @@ Create Date: 2026-05-07 12:17:00
 """
 
 from collections.abc import Sequence
-from alembic import op
+
 import sqlalchemy as sa
+
+from alembic import op
 
 revision = "0003"
 down_revision = "fd5f9586240f"

@@ -1,10 +1,12 @@
 import asyncio
 import logging
 import uuid
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.data.database import get_async_engine
-from app.data.models import Content, YouTuber, Notice
+from app.data.models import Content, Notice, YouTuber
 from app.llm.embedding_service import get_embedding_service
 from app.llm.vector_store import get_vector_store
 

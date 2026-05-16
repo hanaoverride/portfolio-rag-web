@@ -5,20 +5,20 @@ from __future__ import annotations
 import hashlib
 from datetime import datetime, timedelta, timezone
 
-from jose import JWTError
-
 from fastapi import APIRouter, Depends, HTTPException, status
+from jose import JWTError
+from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.dependencies import get_current_user
 from app.auth.service import (
-    verify_password,
-    get_password_hash,
     create_access_token,
     decode_token,
+    get_password_hash,
+    verify_password,
 )
 from app.config import settings
 from app.data.database import get_db
-from app.api.dependencies import get_current_user
 from app.data.models import PasswordResetToken, RevokedToken, User
 from app.data.schemas import (
     AuthTokens,
@@ -28,7 +28,6 @@ from app.data.schemas import (
     RegisterRequest,
     UserProfile,
 )
-from passlib.context import CryptContext
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -127,8 +126,8 @@ async def login_google(
     from app.data.users_repository import create_user, get_user_by_google_sub
 
     try:
-        from google.oauth2 import id_token
         from google.auth.transport import requests
+        from google.oauth2 import id_token
 
         if not settings.google_client_ids:
             raise HTTPException(

@@ -6,9 +6,9 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.dependencies import get_current_user
 from app.data.database import get_db
 from app.data.models import Bookmark, Comment, User
-from app.api.dependencies import get_current_user
 
 router = APIRouter(prefix="/export", tags=["export"])
 

@@ -2,18 +2,18 @@
 
 from __future__ import annotations
 
+import enum
 from datetime import datetime
 from typing import Any
 
-import enum
 from sqlalchemy import (
+    JSON,
     Boolean,
     DateTime,
     Enum,
     ForeignKey,
     Index,
     Integer,
-    JSON,
     String,
     Text,
     UniqueConstraint,
@@ -123,6 +123,9 @@ class User(Base):
     )
     password_reset_tokens: Mapped[list["PasswordResetToken"]] = relationship(
         "PasswordResetToken", back_populates="user", cascade="all, delete-orphan"
+    )
+    notification_states: Mapped[list["UserNotificationState"]] = relationship(
+        "UserNotificationState", back_populates="user", cascade="all, delete-orphan"
     )
 
 
@@ -241,4 +244,27 @@ class Notification(Base):
         ForeignKey("users.id", ondelete="CASCADE"), nullable=True
     )
 
-    user: Mapped[User | None] = relationship("User")
+    user: Mapped[User | None] = relationship(User)
+
+
+class UserNotificationState(Base):
+    __tablename__ = "user_notification_states"
+    __table_args__ = (
+        UniqueConstraint("user_id", "notification_id", name="uq_user_notification_state"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    notification_id: Mapped[int] = mapped_column(
+        ForeignKey("notifications.id", ondelete="CASCADE"), nullable=False
+    )
+    is_read: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now()
+    )
+
+    user: Mapped["User"] = relationship("User", back_populates="notification_states")
+    notification: Mapped["Notification"] = relationship("Notification")

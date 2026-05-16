@@ -9,7 +9,7 @@ import {
   Clock,
   Eye,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatViews } from "@/lib/utils";
 import type { Content } from "@/lib/api/types";
 
 function formatDuration(seconds: number): string {
@@ -22,15 +22,7 @@ function formatDuration(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-function formatViews(views: number): string {
-  if (views >= 10000) {
-    return `${(views / 10000).toFixed(1)}만`;
-  }
-  if (views >= 1000) {
-    return `${(views / 1000).toFixed(1)}천`;
-  }
-  return views.toString();
-}
+
 
 interface ContentCardProps {
   content: Content;

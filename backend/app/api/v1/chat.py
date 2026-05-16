@@ -1,14 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import StreamingResponse
 import json
 
-from app.config import get_settings, Settings
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
+
+from app.config import Settings, get_settings
 from app.data.schemas import ChatCompletionRequest
-from app.llm.stub_chat_service import get_chat_service
 from app.llm.chat_service import APIKeyMissingError
 from app.llm.embedding_service import get_embedding_service
-from app.llm.vector_store import get_vector_store
 from app.llm.protocols import ChatMessage, RAGContext
+from app.llm.stub_chat_service import get_chat_service
+from app.llm.vector_store import get_vector_store
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 

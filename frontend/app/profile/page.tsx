@@ -1,14 +1,40 @@
 "use client";
 
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Mail, User, Calendar } from "lucide-react";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { FormattedDate } from "@/components/common/FormattedDate";
 import { useAuth } from "@/lib/hooks";
+import { getMyStatistics } from "@/lib/api/statistics";
+import { StatisticsResponse } from "@/lib/api/types";
+import { Bookmark, MessageSquare, BarChart3 } from "lucide-react";
 
 
 export default function ProfilePage() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
+  const [stats, setStats] = useState<StatisticsResponse | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (user) {
+        try {
+          const data = await getMyStatistics();
+          setStats(data);
+        } catch (error) {
+          console.error("Failed to fetch user statistics:", error);
+        } finally {
+          setStatsLoading(false);
+        }
+      } else if (!authLoading) {
+        setStatsLoading(false);
+      }
+    };
+    fetchStats();
+  }, [user, authLoading]);
+
+  const isLoading = authLoading || (user && statsLoading);
 
   if (isLoading) {
     return (
@@ -111,12 +137,40 @@ export default function ProfilePage() {
         </div>
 
         <div className="mt-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-surface)] p-6 sm:p-8 shadow-sm">
-          <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">
-            활동 통계
-          </h2>
-          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-            북마크 수와 댓글 수는 추후 구현 예정입니다.
-          </p>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-indigo-500/10 rounded-lg">
+              <BarChart3 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <h2 className="text-xl font-bold text-[var(--color-text-primary)]">
+              내 활동 통계
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="group flex items-center gap-4 p-4 rounded-2xl bg-[var(--color-bg-page)] border border-[var(--color-border-subtle)] transition-all hover:border-indigo-500/30 hover:shadow-md hover:shadow-indigo-500/5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
+                <Bookmark className="h-6 w-6" />
+              </div>
+              <div>
+                <dt className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">북마크</dt>
+                <dd className="text-2xl font-black text-[var(--color-text-primary)]">
+                  {stats?.totalBookmarks.toLocaleString() ?? 0}
+                </dd>
+              </div>
+            </div>
+
+            <div className="group flex items-center gap-4 p-4 rounded-2xl bg-[var(--color-bg-page)] border border-[var(--color-border-subtle)] transition-all hover:border-purple-500/30 hover:shadow-md hover:shadow-purple-500/5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
+                <MessageSquare className="h-6 w-6" />
+              </div>
+              <div>
+                <dt className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">댓글</dt>
+                <dd className="text-2xl font-black text-[var(--color-text-primary)]">
+                  {stats?.totalComments.toLocaleString() ?? 0}
+                </dd>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </>

@@ -1,8 +1,9 @@
 """Admin API endpoints for system management."""
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks
-from app.data.ingest import ingest_data
+from fastapi import APIRouter, BackgroundTasks, HTTPException
+
 from app.config import settings
+from app.data.ingest import ingest_data
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 

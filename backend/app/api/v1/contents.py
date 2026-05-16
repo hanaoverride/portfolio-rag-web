@@ -5,6 +5,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.data.database import get_db
 from app.data.repository import get_content_by_id, get_contents
 from app.data.schemas import (
     Author,
@@ -12,7 +13,6 @@ from app.data.schemas import (
     ContentResponse,
     TableOfContentsItem,
 )
-from app.data.database import get_db
 
 router = APIRouter(prefix="/contents", tags=["contents"])
 
@@ -78,12 +78,15 @@ async def list_contents(
         ]
 
     # Apply sorting
-    if sort_by:
-        reverse = order.lower() == "desc"
-        if sort_by == "views":
-            contents.sort(key=lambda x: x.views, reverse=reverse)
-        elif sort_by == "created_at":
-            contents.sort(key=lambda x: x.created_at, reverse=reverse)
+    if not sort_by:
+        sort_by = "views"
+
+    reverse = order.lower() == "desc"
+    if sort_by == "views":
+        # Sort by views desc, then created_at desc
+        contents.sort(key=lambda x: (x.views, x.created_at), reverse=reverse)
+    elif sort_by == "created_at":
+        contents.sort(key=lambda x: x.created_at, reverse=reverse)
 
     total = len(contents)
     paginated = contents[offset : offset + limit]
@@ -103,6 +106,16 @@ async def get_content(content_id: str, session: AsyncSession = Depends(get_db)):
     if content is None:
         raise HTTPException(status_code=404, detail="Content not found")
     return _content_to_response(content)
+
+
+@router.post("/{content_id}/view")
+async def increment_views(content_id: str, session: AsyncSession = Depends(get_db)):
+    """Increment the view count for a content."""
+    from app.data.repository import increment_content_views
+    success = await increment_content_views(session, content_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Content not found")
+    return {"status": "success"}
 
 
 @router.get("/{content_id}/related", response_model=ContentListResponse)

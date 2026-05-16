@@ -6,16 +6,7 @@ import { cn } from "@/lib/utils";
 import type { YouTuber } from "@/lib/api/types";
 
 function formatSubscribers(count: number): string {
-  if (count >= 1000000) {
-    return `${(count / 1000000).toFixed(1)}M`;
-  }
-  if (count >= 10000) {
-    return `${(count / 10000).toFixed(1)}만`;
-  }
-  if (count >= 1000) {
-    return `${(count / 1000).toFixed(1)}천`;
-  }
-  return count.toString();
+  return count.toLocaleString();
 }
 
 interface RecommendedYouTubersProps {

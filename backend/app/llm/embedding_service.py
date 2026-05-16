@@ -1,7 +1,9 @@
 from typing import List
+
 from openai import AsyncOpenAI
-from app.llm.protocols import EmbeddingServiceProtocol
+
 from app.config import settings
+from app.llm.protocols import EmbeddingServiceProtocol
 
 
 class OpenAIEmbeddingService(EmbeddingServiceProtocol):
