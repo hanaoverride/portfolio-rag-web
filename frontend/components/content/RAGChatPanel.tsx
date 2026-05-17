@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
-import { MessageCircle, X, Send } from 'lucide-react';
+import { MessageCircle, X, Send, Maximize2, Minimize2 } from 'lucide-react';
 import ChatMessage from './ChatMessage';
 import VideoSwapNotification from './VideoSwapNotification';
 import { useChat, StructuredChatContent } from '@/lib/hooks/useChat';
+import { useAuth } from '@/lib/hooks';
+import Link from 'next/link';
 
 interface RAGChatPanelProps {
   contentId?: string;
@@ -14,7 +16,9 @@ interface RAGChatPanelProps {
 const RAGChatPanel: React.FC<RAGChatPanelProps> = ({ contentId = '', contentTitle = '' }) => {
   // Use centralized chat logic
   const { messages, isLoading, error, sendMessage } = useChat();
+  const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const [input, setInput] = useState('');
   const historyRef = useRef<HTMLDivElement | null>(null);
 
@@ -37,7 +41,11 @@ const RAGChatPanel: React.FC<RAGChatPanelProps> = ({ contentId = '', contentTitl
   };
 
   // UI toggles
-  const togglePanel = () => setOpen((v) => !v);
+  const togglePanel = () => {
+    setOpen((v) => !v);
+    if (open) setIsFullScreen(false); // Reset fullscreen when closing
+  };
+  const toggleFullScreen = () => setIsFullScreen((v) => !v);
 
   return (
     <div className="rag-chat-container" style={{ position: 'fixed', right: 24, bottom: 24, zIndex: 100 }}>
@@ -69,19 +77,22 @@ const RAGChatPanel: React.FC<RAGChatPanelProps> = ({ contentId = '', contentTitl
         <div
           className="rag-chat-panel"
           style={{ 
-            position: 'absolute',
-            bottom: 80,
-            right: 0,
-            width: 'min(420px, 90vw)', 
-            height: '600px',
-            maxHeight: 'calc(100vh - 120px)',
+            position: isFullScreen ? 'fixed' : 'absolute',
+            top: isFullScreen ? 0 : 'auto',
+            left: isFullScreen ? 0 : 'auto',
+            bottom: isFullScreen ? 0 : 80,
+            right: isFullScreen ? 0 : 0,
+            width: isFullScreen ? '100vw' : 'min(420px, 90vw)', 
+            height: isFullScreen ? '100vh' : '600px',
+            maxHeight: isFullScreen ? '100vh' : 'calc(100vh - 120px)',
             display: 'flex', 
             flexDirection: 'column', 
-            borderRadius: 16, 
+            borderRadius: isFullScreen ? 0 : 16, 
             overflow: 'hidden', 
             boxShadow: '0 20px 50px rgba(0,0,0,0.2)', 
             background: '#fff',
-            border: '1px solid #f3f4f6'
+            border: isFullScreen ? 'none' : '1px solid #f3f4f6',
+            zIndex: 101
           }}
         >
           <div
@@ -99,9 +110,22 @@ const RAGChatPanel: React.FC<RAGChatPanelProps> = ({ contentId = '', contentTitl
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }}></div>
               <strong style={{ fontSize: '1.1rem', color: '#111827' }}>AI Assistant</strong>
             </div>
-            <button onClick={togglePanel} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#6b7280' }} aria-label="Close">
-              <X size={20} />
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <button 
+                onClick={toggleFullScreen} 
+                style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#6b7280', display: 'flex', alignItems: 'center' }} 
+                aria-label={isFullScreen ? "Restore" : "Fullscreen"}
+              >
+                {isFullScreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+              </button>
+              <button 
+                onClick={togglePanel} 
+                style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#6b7280', display: 'flex', alignItems: 'center' }} 
+                aria-label="Close"
+              >
+                <X size={20} />
+              </button>
+            </div>
           </div>
           
           <div ref={historyRef} className="rag-chat-history" style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: 16, background: '#fff' }}>
