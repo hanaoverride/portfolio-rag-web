@@ -169,50 +169,67 @@ const RAGChatPanel: React.FC<RAGChatPanelProps> = ({ contentId = '', contentTitl
           </div>
 
           <div className="rag-chat-input-container" style={{ padding: '16px 20px', borderTop: '1px solid #f3f4f6' }}>
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center', background: '#f9fafb', borderRadius: 12, padding: '4px 4px 4px 16px', border: '1px solid #e5e7eb' }}>
-              <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    onSend();
-                  }
-                }}
-                disabled={isLoading}
-                placeholder={isLoading ? "AI is thinking..." : "Ask a question..."}
-                style={{ 
-                  flex: 1, 
-                  padding: '10px 0', 
-                  borderRadius: 8, 
-                  border: 'none', 
-                  background: 'transparent',
-                  outline: 'none',
-                  fontSize: '0.95rem',
-                  color: '#111827'
-                }}
-              />
-              <button 
-                onClick={onSend} 
-                disabled={isLoading || !input.trim()}
-                aria-label="Send message"
-                style={{ 
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10, 
-                  border: 'none', 
-                  background: isLoading || !input.trim() ? '#e5e7eb' : '#111827', 
+            {!isAuthenticated ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '10px 0' }}>
+                <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>로그인 후 AI 채팅 기능을 이용해보세요.</p>
+                <Link href="/login" style={{ 
+                  padding: '8px 16px', 
+                  background: '#111827', 
                   color: '#fff', 
-                  cursor: isLoading || !input.trim() ? 'default' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'background 0.2s ease'
-                }}
-              >
-                <Send size={18} />
-              </button>
-            </div>
+                  borderRadius: 8, 
+                  textDecoration: 'none',
+                  fontSize: '0.9rem',
+                  fontWeight: 500
+                }}>
+                  로그인하기
+                </Link>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center', background: '#f9fafb', borderRadius: 12, padding: '4px 4px 4px 16px', border: '1px solid #e5e7eb' }}>
+                <input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      onSend();
+                    }
+                  }}
+                  disabled={isLoading}
+                  placeholder={isLoading ? "AI is thinking..." : "Ask a question..."}
+                  style={{ 
+                    flex: 1, 
+                    padding: '10px 0', 
+                    borderRadius: 8, 
+                    border: 'none', 
+                    background: 'transparent',
+                    outline: 'none',
+                    fontSize: '0.95rem',
+                    color: '#111827'
+                  }}
+                />
+                <button 
+                  onClick={onSend} 
+                  disabled={isLoading || !input.trim()}
+                  aria-label="Send message"
+                  style={{ 
+                    width: 40,
+                    height: 40,
+                    borderRadius: 10, 
+                    border: 'none', 
+                    background: isLoading || !input.trim() ? '#e5e7eb' : '#111827', 
+                    color: '#fff', 
+                    cursor: isLoading || !input.trim() ? 'default' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'background 0.2s ease'
+                  }}
+                >
+                  <Send size={18} />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
