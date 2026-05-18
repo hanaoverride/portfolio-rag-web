@@ -53,6 +53,11 @@ class PasswordResetRequest(CamelModel):
     )
 
 
+class PasswordResetConfirmRequest(CamelModel):
+    token: constr(min_length=1)
+    new_password: constr(min_length=8, max_length=128)
+
+
 class PasswordResetInitResponse(CamelModel):
     message: str
     debug_token: Optional[str] = None
@@ -253,4 +258,3 @@ class StatisticsResponse(CamelModel):
     total_contents: int = Field(ge=0)
     total_views: int = Field(ge=0)
     total_youtubers: int = Field(ge=0)
-

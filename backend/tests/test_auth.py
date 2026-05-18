@@ -201,3 +201,101 @@ async def test_login_response_includes_user_object():
     assert data["user"]["displayName"] == "New User"
     assert data["user"]["email"] == "newuser@example.com"
     assert "expiresAt" in data
+
+
+@pytest.mark.asyncio
+async def test_confirm_password_reset_success(async_client, async_session):
+    import hashlib
+    import secrets
+    from datetime import datetime, timedelta, timezone
+
+    from app.auth.service import get_password_hash, verify_password
+    from app.data.models import PasswordResetToken, User
+
+    # 1. Create a user
+    user = User(
+        email="reset_test@example.com",
+        display_name="Reset User",
+        password_hash=get_password_hash("old_password123"),
+    )
+    async_session.add(user)
+    await async_session.flush()
+
+    # 2. Create a reset token
+    token = secrets.token_urlsafe(32)
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
+    reset_token = PasswordResetToken(
+        user_id=user.id,
+        token_hash=token_hash,
+        expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
+    )
+    async_session.add(reset_token)
+    await async_session.flush()
+    await async_session.commit()
+
+    # 3. Request confirm password reset using JSON body and CamelCase alias
+    response = await async_client.post(
+        "/api/v1/auth/password/confirm",
+        json={
+            "token": token,
+            "newPassword": "new_password_secure_123",
+        },
+    )
+
+    # 4. Assert response
+    assert response.status_code == 200
+    data = response.json()
+    assert "accessToken" in data or "access_token" in data
+
+    # 5. Verify database state
+    await async_session.refresh(user)
+    await async_session.refresh(reset_token)
+    assert verify_password("new_password_secure_123", user.password_hash)
+    assert reset_token.used_at is not None
+
+
+@pytest.mark.asyncio
+async def test_confirm_password_reset_fails_if_same_password(
+    async_client, async_session
+):
+    import hashlib
+    import secrets
+    from datetime import datetime, timedelta, timezone
+
+    from app.auth.service import get_password_hash
+    from app.data.models import PasswordResetToken, User
+
+    # 1. Create a user
+    user = User(
+        email="reset_same_test@example.com",
+        display_name="Reset Same User",
+        password_hash=get_password_hash("same_password123"),
+    )
+    async_session.add(user)
+    await async_session.flush()
+
+    # 2. Create a reset token
+    token = secrets.token_urlsafe(32)
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
+    reset_token = PasswordResetToken(
+        user_id=user.id,
+        token_hash=token_hash,
+        expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
+    )
+    async_session.add(reset_token)
+    await async_session.flush()
+    await async_session.commit()
+
+    # 3. Request confirm password reset using identical password
+    response = await async_client.post(
+        "/api/v1/auth/password/confirm",
+        json={
+            "token": token,
+            "newPassword": "same_password123",
+        },
+    )
+
+    # 4. Assert response
+    assert response.status_code == 400
+    data = response.json()
+    assert data["detail"] == "이전 비밀번호와 동일한 비밀번호는 사용할 수 없습니다"

@@ -19,6 +19,8 @@ test_settings.jwt_secret_key = MagicMock()
 test_settings.jwt_secret_key.get_secret_value.return_value = (
     "test-secret-key-for-testing-only12"
 )
+test_settings.jwt_access_token_exp_minutes = 15
+test_settings.jwt_algorithm = "HS256"
 test_settings.google_client_ids = []
 test_settings.openai_api_key = None
 test_settings.openrouter_api_key = None
@@ -47,16 +49,20 @@ def anyio_backend():
 
 @pytest_asyncio.fixture(scope="session")
 async def test_engine():
+    import app.data.models  # noqa: F401
     from app.data.database import Base
 
     engine = create_async_engine(TEST_DATABASE_URL, echo=False)
+
+    # Keep one connection open to keep the shared memory database alive during testing
+    keep_alive_conn = await engine.connect()
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
     yield engine
 
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+    await keep_alive_conn.close()
     await engine.dispose()
 
 

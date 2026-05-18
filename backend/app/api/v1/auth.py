@@ -23,6 +23,7 @@ from app.data.models import PasswordResetToken, RevokedToken, User
 from app.data.schemas import (
     AuthTokens,
     LoginRequest,
+    PasswordResetConfirmRequest,
     PasswordResetInitResponse,
     PasswordResetRequest,
     RegisterRequest,
@@ -205,11 +206,14 @@ async def request_password_reset(
     db: AsyncSession = Depends(get_db),
 ) -> PasswordResetInitResponse:
     """Request a password reset email."""
+    import secrets
+
     from app.data.users_repository import get_user_by_email
 
     user = await get_user_by_email(db, request.email)
     if user:
-        token_hash = get_password_hash(str(datetime.now(timezone.utc).timestamp()))
+        token = secrets.token_urlsafe(32)
+        token_hash = hashlib.sha256(token.encode()).hexdigest()
 
         reset_token = PasswordResetToken(
             user_id=user.id,
@@ -223,7 +227,7 @@ async def request_password_reset(
         is_dev = settings.environment in ("local", "development") or settings.demo_mode
         return PasswordResetInitResponse(
             message="Password reset email sent",
-            debug_token=token_hash if is_dev else None,
+            debug_token=token if is_dev else None,
         )
 
     # Always return success to prevent email enumeration
@@ -232,16 +236,18 @@ async def request_password_reset(
 
 @router.post("/password/confirm", response_model=AuthTokens)
 async def confirm_password_reset(
-    token: str,
-    new_password: str,
+    request: PasswordResetConfirmRequest,
     db: AsyncSession = Depends(get_db),
 ) -> AuthTokens:
     """Reset password using a valid token."""
     from sqlalchemy import select
+    from sqlalchemy.orm import selectinload
 
-    token_hash = get_password_hash(token)
+    token_hash = hashlib.sha256(request.token.encode()).hexdigest()
     result = await db.execute(
-        select(PasswordResetToken).where(
+        select(PasswordResetToken)
+        .options(selectinload(PasswordResetToken.user))
+        .where(
             PasswordResetToken.token_hash == token_hash,
             PasswordResetToken.used_at.is_(None),
             PasswordResetToken.expires_at > datetime.now(timezone.utc),
@@ -256,7 +262,13 @@ async def confirm_password_reset(
         )
 
     user = reset_token.user
-    user.password_hash = get_password_hash(new_password)
+    if user.password_hash and verify_password(request.new_password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="이전 비밀번호와 동일한 비밀번호는 사용할 수 없습니다",
+        )
+
+    user.password_hash = get_password_hash(request.new_password)
     reset_token.used_at = datetime.now(timezone.utc)
     await db.flush()
 
