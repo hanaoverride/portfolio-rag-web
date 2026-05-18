@@ -9,19 +9,12 @@ from app.llm.protocols import EmbeddingServiceProtocol
 class OpenAIEmbeddingService(EmbeddingServiceProtocol):
     def __init__(self) -> None:
         key = None
-        or_router = getattr(settings, "openrouter_api_key", None)
-        if or_router is not None:
+        ai_key = getattr(settings, "openai_api_key", None)
+        if ai_key is not None:
             try:
-                key = or_router.get_secret_value()
+                key = ai_key.get_secret_value()
             except Exception:
-                key = or_router
-        if not key:
-            ai_key = getattr(settings, "openai_api_key", None)
-            if ai_key is not None:
-                try:
-                    key = ai_key.get_secret_value()
-                except Exception:
-                    key = ai_key
+                key = ai_key
 
         self._api_key = key
         # Note: OpenRouter might not support embeddings well, or might use different endpoints.

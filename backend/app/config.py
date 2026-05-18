@@ -51,9 +51,10 @@ class Settings(BaseSettings):
         default=None,
         validation_alias=AliasChoices("OPENAI_API_BASE", "OPENAI_BASE_URL"),
     )
-    openrouter_api_key: Optional[SecretStr] = Field(default=None)
-    openrouter_base_url: str = Field(default="https://openrouter.ai/api/v1")
-    openrouter_model: str = Field(default="gpt-oss-120b")
+    openai_chat_model: str = Field(
+        default="gpt-oss-120b",
+        validation_alias=AliasChoices("OPENAI_CHAT_MODEL", "OPENROUTER_MODEL"),
+    )
 
     qdrant_url: Optional[str] = Field(default=None)
     qdrant_api_key: Optional[SecretStr] = Field(default=None)

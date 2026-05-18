@@ -20,17 +20,16 @@ def test_stub_chat_service_when_demo_mode_true(monkeypatch):
     class SettingsLike:
         def __init__(self):
             self.demo_mode = True
-            self.openrouter_api_key = None
             self.openai_api_key = None
-            self.openrouter_base_url = "https://openrouter.ai/api/v1"
-            self.openrouter_model = "gpt-oss-120b"
+            self.openai_api_base = "https://openrouter.ai/api/v1"
+            self.openai_chat_model = "gpt-oss-120b"
 
     _patch_settings(monkeypatch, SettingsLike())
     service = get_chat_service()
     assert isinstance(service, StubChatService)
 
 
-def test_real_chat_service_created_when_not_in_demo_and_openrouter_key(monkeypatch):
+def test_real_chat_service_created_with_openai_key(monkeypatch):
     from app.llm.chat_service import RealChatService
     from app.llm.stub_chat_service import get_chat_service
 
@@ -44,50 +43,20 @@ def test_real_chat_service_created_when_not_in_demo_and_openrouter_key(monkeypat
 
     monkeypatch.setattr(chat_service_module, "AsyncOpenAI", DummyClient)
 
-    # Provide settings with OpenRouter API key and demo_mode = False
+    # Provide settings with OpenAI API key and demo_mode = False
     class SettingsLike:
         def __init__(self):
             self.demo_mode = False
-            self.openrouter_api_key = DummySecret("ROUTER-KEY-123")
-            self.openai_api_key = None
-            self.openrouter_base_url = "https://openrouter.ai/api/v1"
-            self.openrouter_model = "gpt-oss-120b"
-
-    _patch_settings(monkeypatch, SettingsLike())
-
-    service = get_chat_service()
-    assert isinstance(service, RealChatService)
-    # Ensure priority picked router key
-    assert service._api_key == "ROUTER-KEY-123"
-    assert service._client is not None
-
-
-def test_openai_key_fallback_when_openrouter_key_missing(monkeypatch):
-    from app.llm.chat_service import RealChatService
-    from app.llm.stub_chat_service import get_chat_service
-
-    class DummyClient:
-        def __init__(self, api_key=None, base_url=None):
-            self.api_key = api_key
-            self.base_url = base_url
-
-    import app.llm.chat_service as chat_service_module
-
-    monkeypatch.setattr(chat_service_module, "AsyncOpenAI", DummyClient)
-
-    class SettingsLike:
-        def __init__(self):
-            self.demo_mode = False
-            self.openrouter_api_key = None
             self.openai_api_key = DummySecret("OPENAI-KEY-456")
-            self.openrouter_base_url = "https://openrouter.ai/api/v1"
-            self.openrouter_model = "gpt-oss-120b"
+            self.openai_api_base = "https://openrouter.ai/api/v1"
+            self.openai_chat_model = "gpt-oss-120b"
 
     _patch_settings(monkeypatch, SettingsLike())
 
     service = get_chat_service()
     assert isinstance(service, RealChatService)
     assert service._api_key == "OPENAI-KEY-456"
+    assert service._client is not None
 
 
 def test_chat_completion_request_schema_with_messages():
