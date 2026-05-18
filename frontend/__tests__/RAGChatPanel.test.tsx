@@ -4,9 +4,14 @@ import '@testing-library/jest-dom';
 
 // Dynamic mock: use mockUseChat.mockReturnValue(...) per test
 const mockUseChat = vi.fn();
+const mockUseAuth = vi.fn().mockReturnValue({ isAuthenticated: true });
 
 vi.mock('@/lib/hooks/useChat', () => ({
   useChat: () => mockUseChat(),
+}));
+
+vi.mock('@/lib/hooks', () => ({
+  useAuth: () => mockUseAuth(),
 }));
 
 import RAGChatPanel from '@/components/content/RAGChatPanel';
