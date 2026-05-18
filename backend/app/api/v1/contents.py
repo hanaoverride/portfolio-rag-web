@@ -112,6 +112,7 @@ async def get_content(content_id: str, session: AsyncSession = Depends(get_db)):
 async def increment_views(content_id: str, session: AsyncSession = Depends(get_db)):
     """Increment the view count for a content."""
     from app.data.repository import increment_content_views
+
     success = await increment_content_views(session, content_id)
     if not success:
         raise HTTPException(status_code=404, detail="Content not found")

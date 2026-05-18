@@ -250,7 +250,9 @@ class Notification(Base):
 class UserNotificationState(Base):
     __tablename__ = "user_notification_states"
     __table_args__ = (
-        UniqueConstraint("user_id", "notification_id", name="uq_user_notification_state"),
+        UniqueConstraint(
+            "user_id", "notification_id", name="uq_user_notification_state"
+        ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

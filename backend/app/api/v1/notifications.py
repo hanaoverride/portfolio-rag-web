@@ -84,7 +84,8 @@ async def get_my_notifications(
         )
         .where(
             and_(
-                (Notification.user_id == current_user.id) | (Notification.user_id.is_(None)),
+                (Notification.user_id == current_user.id)
+                | (Notification.user_id.is_(None)),
                 (UserNotificationState.is_deleted.is_not(True)),
             )
         )
@@ -96,14 +97,18 @@ async def get_my_notifications(
 
     notifications = []
     for row in rows:
-        notifications.append({
-            "id": row.id,
-            "title": row.title,
-            "message": row.message,
-            "is_read": row.state_is_read if row.state_is_read is not None else row.base_is_read,
-            "created_at": row.created_at,
-            "user_id": row.user_id,
-        })
+        notifications.append(
+            {
+                "id": row.id,
+                "title": row.title,
+                "message": row.message,
+                "is_read": row.state_is_read
+                if row.state_is_read is not None
+                else row.base_is_read,
+                "created_at": row.created_at,
+                "user_id": row.user_id,
+            }
+        )
 
     logger.info(f"Found {len(notifications)} notifications")
     return notifications
@@ -126,7 +131,8 @@ async def delete_notification(
     query = select(Notification).where(
         and_(
             Notification.id == notification_id,
-            (Notification.user_id == current_user.id) | (Notification.user_id.is_(None))
+            (Notification.user_id == current_user.id)
+            | (Notification.user_id.is_(None)),
         )
     )
     result = await db.execute(query)
@@ -140,19 +146,25 @@ async def delete_notification(
 
     try:
         # Instead of deleting the record, we insert/update the state table
-        stmt = insert(UserNotificationState).values(
-            user_id=current_user.id,
-            notification_id=notification_id,
-            is_deleted=True,
-            updated_at=func.now()
-        ).on_conflict_do_update(
-            constraint="uq_user_notification_state",
-            set_={"is_deleted": True, "updated_at": func.now()}
+        stmt = (
+            insert(UserNotificationState)
+            .values(
+                user_id=current_user.id,
+                notification_id=notification_id,
+                is_deleted=True,
+                updated_at=func.now(),
+            )
+            .on_conflict_do_update(
+                constraint="uq_user_notification_state",
+                set_={"is_deleted": True, "updated_at": func.now()},
+            )
         )
 
         await db.execute(stmt)
         await db.commit()
-        logger.info(f"Notification {notification_id} dismissed for user {current_user.email}")
+        logger.info(
+            f"Notification {notification_id} dismissed for user {current_user.email}"
+        )
     except Exception as e:
         logger.error(f"Failed to dismiss notification {notification_id}: {e}")
         await db.rollback()
@@ -197,14 +209,18 @@ async def delete_all_notifications(
 
         # Bulk upsert into UserNotificationState
         for nid in notification_ids:
-            upsert_stmt = insert(UserNotificationState).values(
-                user_id=current_user.id,
-                notification_id=nid,
-                is_deleted=True,
-                updated_at=func.now()
-            ).on_conflict_do_update(
-                constraint="uq_user_notification_state",
-                set_={"is_deleted": True, "updated_at": func.now()}
+            upsert_stmt = (
+                insert(UserNotificationState)
+                .values(
+                    user_id=current_user.id,
+                    notification_id=nid,
+                    is_deleted=True,
+                    updated_at=func.now(),
+                )
+                .on_conflict_do_update(
+                    constraint="uq_user_notification_state",
+                    set_={"is_deleted": True, "updated_at": func.now()},
+                )
             )
             await db.execute(upsert_stmt)
 
@@ -236,7 +252,8 @@ async def mark_notification_as_read(
     query = select(Notification).where(
         and_(
             Notification.id == notification_id,
-            (Notification.user_id == current_user.id) | (Notification.user_id.is_(None))
+            (Notification.user_id == current_user.id)
+            | (Notification.user_id.is_(None)),
         )
     )
     result = await db.execute(query)
@@ -246,14 +263,18 @@ async def mark_notification_as_read(
         raise HTTPException(status_code=404, detail="알림을 찾을 수 없습니다.")
 
     try:
-        stmt = insert(UserNotificationState).values(
-            user_id=current_user.id,
-            notification_id=notification_id,
-            is_read=True,
-            updated_at=func.now()
-        ).on_conflict_do_update(
-            constraint="uq_user_notification_state",
-            set_={"is_read": True, "updated_at": func.now()}
+        stmt = (
+            insert(UserNotificationState)
+            .values(
+                user_id=current_user.id,
+                notification_id=notification_id,
+                is_read=True,
+                updated_at=func.now(),
+            )
+            .on_conflict_do_update(
+                constraint="uq_user_notification_state",
+                set_={"is_read": True, "updated_at": func.now()},
+            )
         )
 
         await db.execute(stmt)

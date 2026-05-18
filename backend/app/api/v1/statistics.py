@@ -9,16 +9,18 @@ from ..dependencies import get_current_user
 
 router = APIRouter(prefix="/statistics", tags=["statistics"])
 
+
 @router.get("", response_model=StatisticsResponse)
 async def get_statistics(session: AsyncSession = Depends(get_db)):
     """Get site-wide statistics."""
     stats = await get_site_statistics(session)
     return stats
 
+
 @router.get("/me", response_model=StatisticsResponse)
 async def get_my_statistics(
     session: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     """Get statistics for the current user."""
     stats = await get_user_statistics(session, current_user.id)

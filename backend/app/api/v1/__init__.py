@@ -31,4 +31,3 @@ router.include_router(notices_router, prefix="/notices", tags=["notices"])
 router.include_router(notifications_router)
 router.include_router(admin_router)
 router.include_router(statistics_router)
-
