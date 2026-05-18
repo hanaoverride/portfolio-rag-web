@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 if settings.resend_api_key:
     resend.api_key = settings.resend_api_key.get_secret_value()
 
+
 def send_password_reset_email(to_email: str, reset_link: str) -> bool:
     """사용자에게 비밀번호 재설정 링크를 발송합니다."""
     if not settings.resend_api_key:

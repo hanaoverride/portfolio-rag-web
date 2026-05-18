@@ -45,6 +45,10 @@ class LoginRequest(CamelModel):
     password: constr(min_length=1, max_length=128)
 
 
+class GoogleLoginRequest(CamelModel):
+    id_token: constr(min_length=20, max_length=8192)
+
+
 class PasswordResetRequest(CamelModel):
     email: constr(
         min_length=1,

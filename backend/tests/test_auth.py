@@ -72,7 +72,8 @@ async def test_login_google_rejects_inactive_user(async_client, async_session):
                 mock_settings.google_client_ids = ["test-client-id"]
 
                 response = await async_client.post(
-                    "/api/v1/auth/login/google?token=valid_google_token",
+                    "/api/v1/auth/login/google",
+                    json={"idToken": "valid_google_token_longer_than_20"},
                 )
 
     assert response.status_code == 401

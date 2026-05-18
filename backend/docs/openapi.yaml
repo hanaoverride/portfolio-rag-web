@@ -346,14 +346,12 @@ paths:
       - auth
       summary: Login with Google
       operationId: loginWithGoogle
-      parameters:
-      - name: token
-        in: query
+      requestBody:
         required: true
-        schema:
-          type: string
-          minLength: 20
-          maxLength: 8192
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoogleLoginRequest'
       responses:
         '200':
           description: OK
@@ -951,6 +949,15 @@ components:
           type: string
           minLength: 1
           maxLength: 128
+    GoogleLoginRequest:
+      type: object
+      required:
+      - idToken
+      properties:
+        idToken:
+          type: string
+          minLength: 20
+          maxLength: 8192
     PasswordResetRequest:
       type: object
       required:

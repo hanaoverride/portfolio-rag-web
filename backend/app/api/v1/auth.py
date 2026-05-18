@@ -22,6 +22,7 @@ from app.data.database import get_db
 from app.data.models import PasswordResetToken, RevokedToken, User
 from app.data.schemas import (
     AuthTokens,
+    GoogleLoginRequest,
     LoginRequest,
     PasswordResetConfirmRequest,
     PasswordResetInitResponse,
@@ -121,12 +122,13 @@ async def login_email(
 
 @router.post("/login/google", response_model=AuthTokens)
 async def login_google(
-    token: str,
+    request: GoogleLoginRequest,
     db: AsyncSession = Depends(get_db),
 ) -> AuthTokens:
     """Login or register with a Google ID token."""
     from app.data.users_repository import create_user, get_user_by_google_sub
 
+    token = request.id_token
     try:
         from google.auth.transport import requests
         from google.oauth2 import id_token
