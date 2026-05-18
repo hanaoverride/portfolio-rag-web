@@ -299,3 +299,50 @@ async def test_confirm_password_reset_fails_if_same_password(
     assert response.status_code == 400
     data = response.json()
     assert data["detail"] == "이전 비밀번호와 동일한 비밀번호는 사용할 수 없습니다"
+
+
+@pytest.mark.asyncio
+async def test_request_password_reset_success(async_client, async_session):
+    from unittest.mock import patch
+
+    from app.auth.service import get_password_hash
+    from app.data.models import User
+
+    # Create a user
+    user = User(
+        email="reset_success_test@example.com",
+        display_name="Reset Success User",
+        password_hash=get_password_hash("password123"),
+    )
+    async_session.add(user)
+    await async_session.flush()
+    await async_session.commit()
+
+    # Request password reset, mocking the send_password_reset_email background task
+    with patch("app.api.v1.auth.send_password_reset_email") as mock_send:
+        response = await async_client.post(
+            "/api/v1/auth/password/reset",
+            json={"email": "reset_success_test@example.com"},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["message"] == "Password reset email sent"
+        assert "debugToken" not in data
+        assert "debug_token" not in data
+
+        # Verify background task was called
+        mock_send.assert_called_once()
+        args, _ = mock_send.call_args
+        assert args[0] == "reset_success_test@example.com"
+        assert "reset-password?token=" in args[1]
+
+
+def test_send_password_reset_email_without_key():
+    from unittest.mock import patch
+
+    from app.config import settings
+    from app.services.email import send_password_reset_email
+
+    with patch.object(settings, "resend_api_key", None):
+        result = send_password_reset_email("test@example.com", "http://test-link")
+        assert result is False

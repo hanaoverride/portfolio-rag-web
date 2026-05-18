@@ -60,7 +60,6 @@ class PasswordResetConfirmRequest(CamelModel):
 
 class PasswordResetInitResponse(CamelModel):
     message: str
-    debug_token: Optional[str] = None
 
 
 class CreateCommentRequest(CamelModel):

@@ -65,6 +65,13 @@ class Settings(BaseSettings):
     demo_mode: bool = Field(default=False)
     cache_ttl_seconds: int = Field(default=300, ge=30, le=3600)
 
+    resend_api_key: Optional[SecretStr] = Field(
+        default=None,
+        validation_alias=AliasChoices("RESEND_API_KEY"),
+    )
+    mail_from: str = Field(default="Layer <noreply@resend.dev>")
+    frontend_url: str = Field(default="http://localhost:3000")
+
     @field_validator(
         "allowed_origins", "trusted_hosts", "google_client_ids", mode="before"
     )

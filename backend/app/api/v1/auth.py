@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from jose import JWTError
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,6 +29,7 @@ from app.data.schemas import (
     RegisterRequest,
     UserProfile,
 )
+from app.services.email import send_password_reset_email
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -203,6 +204,7 @@ async def logout(
 @router.post("/password/reset", response_model=PasswordResetInitResponse)
 async def request_password_reset(
     request: PasswordResetRequest,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ) -> PasswordResetInitResponse:
     """Request a password reset email."""
@@ -223,12 +225,13 @@ async def request_password_reset(
         db.add(reset_token)
         await db.flush()
 
-        # Include debugToken in dev mode only
-        is_dev = settings.environment in ("local", "development") or settings.demo_mode
-        return PasswordResetInitResponse(
-            message="Password reset email sent",
-            debug_token=token if is_dev else None,
-        )
+        # Build the password reset URL using FRONTEND_URL
+        reset_link = f"{settings.frontend_url}/reset-password?token={token}"
+
+        # Send actual email in background
+        background_tasks.add_task(send_password_reset_email, user.email, reset_link)
+
+        return PasswordResetInitResponse(message="Password reset email sent")
 
     # Always return success to prevent email enumeration
     return PasswordResetInitResponse(message="Password reset email sent")
