@@ -1,7 +1,5 @@
 <div align="center">
 
-# Layer
-
 <!-- Primary Logo -->
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./docs/logo-dark.svg">
