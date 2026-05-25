@@ -1,6 +1,6 @@
-# Layer
-
 <div align="center">
+
+# Layer
 
 <!-- Primary Logo -->
 <picture>
