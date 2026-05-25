@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" fill="none">
-  <text x="0" y="46" font-family="'Plus Jakarta Sans', Pretendard, system-ui, -apple-system, sans-serif" font-size="48" font-weight="700" fill="#059669">L</text>
-  <text x="34" y="46" font-family="'Plus Jakarta Sans', Pretendard, system-ui, -apple-system, sans-serif" font-size="48" font-weight="300" fill="#14B8A6">ayer</text>
-  <circle cx="98" cy="8" r="4" fill="#D97706"/>
+  <text x="100" y="46" font-family="'Plus Jakarta Sans', Pretendard, system-ui, -apple-system, sans-serif" font-size="48" text-anchor="middle">
+    <tspan font-weight="700" fill="#059669">L</tspan><tspan font-weight="300" fill="#14B8A6">ayer</tspan><tspan dy="-18" font-size="24" font-weight="700" fill="#D97706">•</tspan>
+  </text>
 </svg>
