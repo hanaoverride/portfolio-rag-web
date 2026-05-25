@@ -2,12 +2,13 @@
 
 <div align="center">
 
-<!-- Primary Logo SVG -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" fill="none">
-  <text x="0" y="46" font-family="Pretendard, sans-serif" font-size="48" font-weight="700" fill="#059669">L</text>
-  <text x="34" y="46" font-family="Pretendard, sans-serif" font-size="48" font-weight="300" fill="#14B8A6">ayer</text>
-  <circle cx="98" cy="8" r="4" fill="#D97706"/>
-</svg>
+<!-- Primary Logo -->
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./docs/logo-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="./docs/logo-light.svg">
+  <img alt="Layer Logo" src="./docs/logo-light.svg" width="200">
+</picture>
+
 
 **풀스택 플랫폼 포트폴리오 | AI 기반 콘텐츠 처리 및 RAG**
 
