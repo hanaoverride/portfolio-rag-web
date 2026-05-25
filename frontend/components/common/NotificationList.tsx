@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { notificationsApi, Notification } from '@/lib/api';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -14,9 +14,12 @@ interface NotificationListProps {
 
 export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-   const [isLoading, setIsLoading] = useState(true);
-   const { showToast } = useToast();
-   useAuth();
+  const [isLoading, setIsLoading] = useState(true);
+  const { showToast } = useToast();
+  useAuth();
+
+  const backupNotificationsRef = useRef<Notification[]>([]);
+  const deleteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchNotifications = async () => {
     try {
@@ -31,6 +34,16 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
 
   useEffect(() => {
     fetchNotifications();
+
+    // Cleanup: 만약 실행 취소 타이머가 도는 중에 언마운트되면 즉시 삭제 요청을 보냅니다.
+    return () => {
+      if (deleteTimeoutRef.current) {
+        clearTimeout(deleteTimeoutRef.current);
+        notificationsApi.deleteAll().catch(err => {
+          console.error('Failed to run final cleanup deleteAll:', err);
+        });
+      }
+    };
   }, []);
 
   const handleDelete = async (id: number) => {
@@ -43,18 +56,47 @@ export const NotificationList: React.FC<NotificationListProps> = ({ onClose }) =
     }
   };
 
-  const handleDeleteAll = async () => {
-    if (!confirm('모든 알림을 삭제하시겠습니까?')) return;
-    
-    try {
-      await notificationsApi.deleteAll();
-      setNotifications([]);
-      window.dispatchEvent(new CustomEvent('notificationsUpdated'));
-      showToast('모든 알림이 삭제되었습니다.', 'success');
-    } catch (error) {
-      console.error('Failed to delete all notifications:', error);
-      showToast('알림 삭제에 실패했습니다.', 'error');
+  const handleUndoAll = () => {
+    if (deleteTimeoutRef.current) {
+      clearTimeout(deleteTimeoutRef.current);
+      deleteTimeoutRef.current = null;
     }
+    setNotifications(backupNotificationsRef.current);
+    window.dispatchEvent(new CustomEvent('notificationsUpdated'));
+    showToast('삭제가 취소되었습니다.', 'success');
+  };
+
+  const handleDeleteAll = async () => {
+    // 혹시 이미 실행 중인 이전 타이머가 있다면 즉시 백엔드 반영을 완료합니다.
+    if (deleteTimeoutRef.current) {
+      clearTimeout(deleteTimeoutRef.current);
+      try {
+        await notificationsApi.deleteAll();
+      } catch (err) {
+        console.error('Failed to trigger previous deleteAll:', err);
+      }
+    }
+
+    backupNotificationsRef.current = notifications;
+    setNotifications([]);
+    window.dispatchEvent(new CustomEvent('notificationsUpdated'));
+
+    deleteTimeoutRef.current = setTimeout(async () => {
+      try {
+        await notificationsApi.deleteAll();
+        deleteTimeoutRef.current = null;
+        backupNotificationsRef.current = [];
+      } catch (error) {
+        console.error('Failed to delete all notifications:', error);
+      }
+    }, 4000);
+
+    showToast(
+      '모든 알림이 삭제되었습니다.',
+      'success',
+      4000,
+      { label: '실행 취소', onClick: handleUndoAll }
+    );
   };
 
   if (isLoading) {

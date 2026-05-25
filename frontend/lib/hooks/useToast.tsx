@@ -7,11 +7,20 @@ export interface Toast {
   message: string;
   type: 'success' | 'error';
   visible: boolean;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
 }
 
 interface ToastContextValue {
   toasts: Toast[];
-  showToast: (message: string, type: 'success' | 'error', duration?: number) => void;
+  showToast: (
+    message: string,
+    type: 'success' | 'error',
+    duration?: number,
+    action?: { label: string; onClick: () => void }
+  ) => void;
   removeToast: (id: string) => void;
 }
 
@@ -31,9 +40,14 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const showToast = useCallback(
-    (message: string, type: 'success' | 'error', duration = 3000) => {
+    (
+      message: string,
+      type: 'success' | 'error',
+      duration = 3000,
+      action?: { label: string; onClick: () => void }
+    ) => {
       const id = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-      setToasts((prev) => [...prev, { id, message, type, visible: true }]);
+      setToasts((prev) => [...prev, { id, message, type, visible: true, action }]);
 
       const timer = setTimeout(() => {
         removeToast(id);

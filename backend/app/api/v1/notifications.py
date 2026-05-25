@@ -87,6 +87,7 @@ async def get_my_notifications(
                 (Notification.user_id == current_user.id)
                 | (Notification.user_id.is_(None)),
                 (UserNotificationState.is_deleted.is_not(True)),
+                Notification.created_at >= current_user.created_at,
             )
         )
         .order_by(Notification.created_at.desc())

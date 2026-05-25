@@ -33,6 +33,19 @@ function ToastUI() {
           <Toast.Title className="text-sm font-medium leading-5">
             {toast.message}
           </Toast.Title>
+          {toast.action && (
+            <Toast.Action
+              altText={toast.action.label}
+              onClick={(e) => {
+                e.preventDefault();
+                toast.action?.onClick();
+                removeToast(toast.id);
+              }}
+              className="ml-auto mr-1 text-xs font-bold underline hover:text-white/85 shrink-0 cursor-pointer transition-colors bg-white/10 hover:bg-white/20 px-2 py-1 rounded-md"
+            >
+              {toast.action.label}
+            </Toast.Action>
+          )}
           <Toast.Close
             className="absolute top-3.5 right-3 inline-flex items-center justify-center rounded-full p-1 text-white/60 hover:text-white hover:bg-white/10 transition-all duration-200"
             aria-label="Close toast"
