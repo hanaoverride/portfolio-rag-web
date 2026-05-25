@@ -55,7 +55,7 @@ CONTENTS = [
         "author_name": "Fireship",
         "author_avatar": "https://ui-avatars.com/api/?name=Fireship&background=ff5252&color=fff",
         "duration": 153,
-        "views": 124500,
+        "views": 0,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "is_new": True,
         "table_of_contents": [
@@ -145,7 +145,7 @@ Bash 스크립트는 단순한 도구를 넘어 시스템 관리자와 개발자
         "author_name": "Fireship",
         "author_avatar": "https://ui-avatars.com/api/?name=Fireship&background=ff5252&color=fff",
         "duration": 149,
-        "views": 85600,
+        "views": 0,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "is_new": False,
         "table_of_contents": [
@@ -225,7 +225,7 @@ Docker, Kubernetes, Terraform 등 현대 클라우드 인프라의 핵심 도구
         "author_name": "Theo - t3.gg",
         "author_avatar": "https://ui-avatars.com/api/?name=Theo&background=6366f1&color=fff",
         "duration": 1500,
-        "views": 42300,
+        "views": 0,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "is_new": False,
         "table_of_contents": [
@@ -301,7 +301,7 @@ Prisma 스키마 파일 하나로 데이터베이스 모델을 정의하고, 자
         "author_name": "Theo - t3.gg",
         "author_avatar": "https://ui-avatars.com/api/?name=Theo&background=6366f1&color=fff",
         "duration": 1810,
-        "views": 28900,
+        "views": 0,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "is_new": False,
         "table_of_contents": [
@@ -372,7 +372,7 @@ const r = routes(["home", "about"]); // readonly ["home", "about"] 타입으로 
         "author_name": "ThePrimeagen",
         "author_avatar": "https://ui-avatars.com/api/?name=Primeagen&background=10b981&color=fff",
         "duration": 1847,
-        "views": 156000,
+        "views": 0,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "is_new": False,
         "table_of_contents": [
@@ -448,7 +448,7 @@ require('lspconfig').pyright.setup({})
         "author_name": "ThePrimeagen",
         "author_avatar": "https://ui-avatars.com/api/?name=Primeagen&background=10b981&color=fff",
         "duration": 744,
-        "views": 72100,
+        "views": 0,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "is_new": True,
         "table_of_contents": [

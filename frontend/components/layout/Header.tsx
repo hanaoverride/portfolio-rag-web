@@ -188,7 +188,7 @@ export function Header({
         {/* Center: Search */}
         <form
           onSubmit={handleSearchSubmit}
-          className="hidden md:flex relative items-center gap-2.5 rounded-full border border-[var(--color-border)] bg-[var(--color-bg-page)]/60 px-4 py-2 transition-all duration-300 focus-within:border-primary-400 focus-within:ring-2 focus-within:ring-primary-400/20 focus-within:bg-[var(--color-bg-surface)]"
+          className="hidden md:flex relative items-center gap-2.5 rounded-full border border-[var(--color-border)] bg-[var(--color-input-bg)] px-4 py-2 transition-all duration-300 focus-within:border-primary-400 focus-within:ring-2 focus-within:ring-primary-400/20 focus-within:bg-[var(--color-bg-surface)]"
         >
           <Search className="h-4 w-4 text-[var(--color-text-muted)] shrink-0" />
           <input
@@ -365,7 +365,7 @@ export function Header({
       {mobileMenuOpen && (
         <div className="glass border-t border-[var(--color-border)] px-4 pb-5 pt-3 md:hidden animate-fade-in-up">
           <form onSubmit={handleSearchSubmit} className="mb-4 relative">
-            <div className="flex items-center gap-2.5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-page)]/60 px-4 py-2.5">
+            <div className="flex items-center gap-2.5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-input-bg)] px-4 py-2.5">
               <Search className="h-4 w-4 text-[var(--color-text-muted)]" />
               <input
                 type="search"

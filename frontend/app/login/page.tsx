@@ -156,7 +156,7 @@ function LoginPageInner() {
   const disabled = isSubmitting || isLoading;
 
   const inputClasses = (hasError?: boolean) => cn(
-    "w-full rounded-xl border bg-[var(--color-bg-page)]/60 px-10 py-3 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] transition-all duration-200 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:bg-[var(--color-bg-surface)]",
+    "w-full rounded-xl border bg-[var(--color-input-bg)] px-10 py-3 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] transition-all duration-200 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:bg-[var(--color-bg-surface)]",
     hasError ? "border-error" : "border-[var(--color-border)]"
   );
 
